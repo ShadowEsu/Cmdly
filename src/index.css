@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Light (default when .dark is absent) ─────────────────────────────────── */
+:root {
+  color-scheme: light dark;
+  --color-vault-bg: #f1f5f9;
+  --color-vault-fg: #0f172a;
+  --color-vault-muted: #475569;
+  --color-vault-subtle: #64748b;
+  --color-vault-border: rgba(15, 23, 42, 0.12);
+  --color-vault-surface: rgba(255, 255, 255, 0.92);
+  --color-vault-elevated: #ffffff;
+  --color-vault-nav: rgba(248, 250, 252, 0.92);
+  --color-vault-scrim: rgba(15, 23, 42, 0.06);
+  --color-vault-pill-inactive: rgba(15, 23, 42, 0.06);
+  --color-vault-pill-active-fg: #0f172a;
+  --particle-grid-line: rgba(15, 23, 42, 0.07);
+  --particle-dot-rgb: 100, 116, 139;
+  --constellation-orbit: rgba(15, 23, 42, 0.14);
+  --constellation-node-bg: rgba(255, 255, 255, 0.9);
+  --card-elev-shadow: 0 10px 32px rgba(15, 23, 42, 0.12);
+}
+
+/* ── Dark (html.dark) ───────────────────────────────────────────────────── */
+html.dark {
+  --color-vault-bg: #0a0a0f;
+  --color-vault-fg: #fafafa;
+  --color-vault-muted: #a1a1aa;
+  --color-vault-subtle: #71717a;
+  --color-vault-border: rgba(255, 255, 255, 0.1);
+  --color-vault-surface: rgba(255, 255, 255, 0.05);
+  --color-vault-elevated: #12121a;
+  --color-vault-nav: rgba(10, 10, 15, 0.92);
+  --color-vault-scrim: rgba(0, 0, 0, 0.35);
+  --color-vault-pill-inactive: rgba(255, 255, 255, 0.08);
+  --color-vault-pill-active-fg: #fafafa;
+  --particle-grid-line: rgba(255, 255, 255, 0.06);
+  --particle-dot-rgb: 148, 163, 184;
+  --constellation-orbit: rgba(255, 255, 255, 0.08);
+  --constellation-node-bg: rgba(10, 10, 15, 0.78);
+  --card-elev-shadow: 0 12px 42px rgba(0, 0, 0, 0.5);
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  background-color: var(--color-vault-bg);
+  color: var(--color-vault-fg);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition-property: color, background-color;
+  transition-duration: 200ms;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: "Crimson Pro", system-ui, serif;
+}
+
+/* Scrollbars adapt to scheme */
+:root {
+  --scrollbar-thumb: rgba(15, 23, 42, 0.2);
+}
+html.dark {
+  --scrollbar-thumb: rgba(255, 255, 255, 0.15);
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 999px;
+}
