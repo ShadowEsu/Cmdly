@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.FilterChip
@@ -126,7 +125,7 @@ fun SearchScreen(
 private fun rank(all: List<VaultCommand>, query: String, filter: PlatformFilter): List<VaultCommand> {
     val needle = query.trim().lowercase()
     val platformPred: (VaultCommand) -> Boolean = when (filter) {
-        PlatformFilter.All -> { true }
+        PlatformFilter.All -> { _ -> true }
         is PlatformFilter.One -> { c -> c.platform == filter.platform }
     }
 

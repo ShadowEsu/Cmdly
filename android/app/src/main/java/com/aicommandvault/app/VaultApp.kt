@@ -27,16 +27,19 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.aicommandvault.app.data.Platform
 import com.aicommandvault.app.data.SavedStore
+import com.aicommandvault.app.data.SettingsStore
 import com.aicommandvault.app.ui.screens.HomeScreen
 import com.aicommandvault.app.ui.screens.PlatformScreen
 import com.aicommandvault.app.ui.screens.SavedScreen
 import com.aicommandvault.app.ui.screens.SearchScreen
+import com.aicommandvault.app.ui.screens.SettingsScreen
 import com.aicommandvault.app.ui.theme.AiCommandVaultTheme
 
 private object Routes {
     const val HOME = "home"
     const val SEARCH = "search"
     const val SAVED = "saved"
+    const val SETTINGS = "settings"
     const val PLATFORM = "platform/{id}"
     fun platform(id: String) = "platform/$id"
 }
@@ -45,15 +48,19 @@ private object Routes {
 fun VaultApp() {
     val context = LocalContext.current
     val savedStore = remember { SavedStore(context) }
+    val settingsStore = remember { SettingsStore(context) }
 
     var savedRevision by remember { mutableIntStateOf(0) }
+    var settingsRevision by remember { mutableIntStateOf(0) }
 
     AiCommandVaultTheme {
         VaultRoot(
             savedStore = savedStore,
             savedRevision = savedRevision,
             onSavedChanged = { savedRevision++ },
-            hapticsEnabled = true,
+            settingsStore = settingsStore,
+            settingsRevision = settingsRevision,
+            onSettingsChanged = { settingsRevision++ },
         )
     }
 }
@@ -63,8 +70,11 @@ private fun VaultRoot(
     savedStore: SavedStore,
     savedRevision: Int,
     onSavedChanged: () -> Unit,
-    hapticsEnabled: Boolean,
+    settingsStore: SettingsStore,
+    settingsRevision: Int,
+    onSettingsChanged: () -> Unit,
 ) {
+    val hapticsEnabled = remember(settingsRevision) { settingsStore.hapticsEnabled() }
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
     val route = backStackEntry?.destination?.route.orEmpty()
@@ -110,6 +120,7 @@ private fun VaultRoot(
                     onNavigatePlatform = { p -> navController.navigate(Routes.platform(p.routeId)) },
                     onNavigateSearch = { navController.navigate(Routes.SEARCH) },
                     onNavigateSaved = { navController.navigate(Routes.SAVED) },
+                    onNavigateSettings = { navController.navigate(Routes.SETTINGS) },
                 )
             }
             composable(Routes.SEARCH) {
@@ -139,6 +150,12 @@ private fun VaultRoot(
                     onSavedChanged = onSavedChanged,
                     hapticsEnabled = hapticsEnabled,
                     onBack = { navController.popBackStack() },
+                )
+            }
+            composable(Routes.SETTINGS) {
+                SettingsScreen(
+                    settings = settingsStore,
+                    onSettingsChanged = onSettingsChanged,
                 )
             }
         }

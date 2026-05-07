@@ -6,6 +6,7 @@ import { HomePage } from "./pages/HomePage";
 import { PlatformPage } from "./pages/PlatformPage";
 import { SearchPage } from "./pages/SearchPage";
 import { CollectionsPage } from "./pages/CollectionsPage";
+import { SettingsPage } from "./pages/SettingsPage";
 
 function Shell({ children }: { children: ReactNode }) {
   return (
@@ -26,6 +27,7 @@ export default function App() {
             <Route path="/platform/:id" element={<PlatformPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/collections" element={<CollectionsPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Shell>
