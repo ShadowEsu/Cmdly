@@ -8,15 +8,43 @@ import type { Command, PlatformId } from "../types";
 
 const PLATFORM_FILTERS: Array<PlatformId | "all"> = ["all", ...PLATFORMS.map((p) => p.id)];
 
+const SYNONYMS: Record<string, string[]> = {
+  permissions: ["sandbox", "security", "access"],
+  sandbox: ["permissions", "security", "isolated"],
+  review: ["diff", "audit", "check"],
+  diff: ["review", "changes", "patch"],
+  plan: ["ultraplan", "strategy", "workflow"],
+  mcp: ["plugin", "tool", "connector"],
+  debug: ["fix", "doctor", "troubleshoot"],
+};
+
 function score(cmd: Command, q: string): number {
-  const hay = `${cmd.name} ${cmd.short} ${cmd.detail} ${cmd.category}`.toLowerCase();
   const needle = q.trim().toLowerCase();
   if (!needle) return 1;
+
+  const hay = `${cmd.name} ${cmd.short} ${cmd.detail} ${cmd.category}`.toLowerCase();
   let sc = 0;
+
   if (cmd.name.toLowerCase().includes(needle)) sc += 6;
   if (cmd.short.toLowerCase().includes(needle)) sc += 3;
   if (cmd.detail.toLowerCase().includes(needle)) sc += 1;
   if (cmd.category.toLowerCase().includes(needle)) sc += 2;
+
+  // Synonym matching
+  for (const [key, syns] of Object.entries(SYNONYMS)) {
+    if (needle.includes(key)) {
+      for (const syn of syns) {
+        if (hay.includes(syn)) sc += 2;
+      }
+    }
+    // Also reverse match: if needle is a synonym, match the key
+    for (const syn of syns) {
+      if (needle.includes(syn) && hay.includes(key)) {
+        sc += 2;
+      }
+    }
+  }
+
   if (sc === 0 && hay.includes(needle)) sc = 1;
   return sc;
 }

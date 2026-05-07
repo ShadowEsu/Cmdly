@@ -5,6 +5,7 @@ import { ParticleGrid } from "../components/ParticleGrid";
 import { GlowSearch } from "../components/GlowSearch";
 import { PlatformRail } from "../components/PlatformRail";
 import { CommandConstellation } from "../components/CommandConstellation";
+import { CommandDetailSheet } from "../components/CommandDetailSheet";
 import { ALL_COMMANDS } from "../data/commands";
 import { PLATFORMS, platformById } from "../data/platforms";
 import { pickWeightedUnique, shuffle } from "../lib/shuffle";
@@ -12,8 +13,7 @@ import type { Command } from "../types";
 
 const GREETING = "Hello, Coder!" as const;
 
-function MiniCommandCard({ cmd, delay }: { cmd: Command; delay: number }) {
-  const nav = useNavigate();
+function MiniCommandCard({ cmd, delay, onSelect }: { cmd: Command; delay: number; onSelect: (cmd: Command) => void }) {
   const p = platformById(cmd.platform);
   return (
     <motion.button
@@ -23,7 +23,7 @@ function MiniCommandCard({ cmd, delay }: { cmd: Command; delay: number }) {
       transition={{ delay, type: "spring", stiffness: 420, damping: 28 }}
       whileHover={{ y: -2 }}
       whileTap={{ scale: 0.98 }}
-      onClick={() => nav(`/platform/${cmd.platform}`, { state: { focusId: cmd.id } })}
+      onClick={() => onSelect(cmd)}
       className="group relative w-[220px] shrink-0 overflow-hidden rounded-2xl border border-vault-border bg-vault-surface p-3 text-left backdrop-blur-xl"
       style={{ boxShadow: `0 0 0 1px ${p.accentSoft} inset, var(--card-elev-shadow)` }}
     >
@@ -71,6 +71,7 @@ function StatChip({ label, value }: { label: string; value: string }) {
 
 export function HomePage() {
   const nav = useNavigate();
+  const [focusCmd, setFocusCmd] = useState<Command | null>(null);
 
   const bundles = useMemo(() => {
     const featured = pickWeightedUnique(ALL_COMMANDS, 7);
@@ -137,7 +138,7 @@ export function HomePage() {
           <SectionHeader title="Featured picks" subtitle="Weighted random + variety each load" />
           <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 pt-1">
             {bundles.featured.map((cmd, i) => (
-              <MiniCommandCard key={cmd.id} cmd={cmd} delay={0.04 * i} />
+              <MiniCommandCard key={cmd.id} cmd={cmd} delay={0.04 * i} onSelect={setFocusCmd} />
             ))}
           </div>
         </section>
@@ -146,7 +147,7 @@ export function HomePage() {
           <SectionHeader title="Trending shuffle" subtitle="Uniform random slice — fresh mix each time" />
           <div className="-mx-1 flex gap-3 overflow-x-auto px-1 pb-1 pt-1">
             {bundles.trending.map((cmd, i) => (
-              <MiniCommandCard key={`t-${cmd.id}-${i}`} cmd={cmd} delay={0.02 * i} />
+              <MiniCommandCard key={`t-${cmd.id}-${i}`} cmd={cmd} delay={0.02 * i} onSelect={setFocusCmd} />
             ))}
           </div>
         </section>
@@ -162,7 +163,7 @@ export function HomePage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.05 * i, type: "spring", stiffness: 380, damping: 26 }}
                 whileTap={{ scale: 0.98 }}
-                onClick={() => nav(`/platform/${cmd.platform}`)}
+                onClick={() => setFocusCmd(cmd)}
                 className="rounded-2xl border border-vault-border bg-vault-surface p-3 text-left backdrop-blur-xl"
                 style={{ boxShadow: `0 0 0 1px ${platformById(cmd.platform).accentSoft} inset, var(--card-elev-shadow)` }}
               >
@@ -184,7 +185,7 @@ export function HomePage() {
                 key={cmd.id}
                 type="button"
                 whileTap={{ scale: 0.99 }}
-                onClick={() => nav(`/platform/${cmd.platform}`)}
+                onClick={() => setFocusCmd(cmd)}
                 className="flex items-center justify-between rounded-2xl border border-vault-border bg-vault-surface px-4 py-3 text-left backdrop-blur-md"
               >
                 <div>
@@ -222,6 +223,8 @@ export function HomePage() {
           <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
       </motion.button>
+
+      <CommandDetailSheet cmd={focusCmd} onClose={() => setFocusCmd(null)} />
     </div>
   );
 }
