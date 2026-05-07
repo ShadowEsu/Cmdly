@@ -4,6 +4,7 @@ import type { Command } from "../types";
 import { platformById } from "../data/platforms";
 import { useCollections } from "../context/CollectionsContext";
 import { CopyIcon } from "./CopyIcon";
+import { CommandDetailSheet } from "./CommandDetailSheet";
 
 function BookmarkIcon({ filled, className, size = 20 }: { filled: boolean; className?: string; size?: number }) {
   return (
@@ -26,15 +27,19 @@ function BookmarkIcon({ filled, className, size = 20 }: { filled: boolean; class
 }
 
 export function CommandRow({ cmd, index = 0 }: { cmd: Command; index?: number }) {
-  const [open, setOpen] = useState(false);
+  const [showSheet, setShowSheet] = useState(false);
   const { toggleSave, isSaved } = useCollections();
   const p = platformById(cmd.platform);
   const saved = isSaved(cmd.id);
+
+  const [copied, setCopied] = useState(false);
 
   async function copyText(text: string) {
     try {
       await navigator.clipboard.writeText(text);
       if ("vibrate" in navigator) navigator.vibrate(12);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch {
       /* ignore */
     }
@@ -45,7 +50,7 @@ export function CommandRow({ cmd, index = 0 }: { cmd: Command; index?: number })
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, type: "spring", stiffness: 380, damping: 28 }}
-      className="group relative overflow-hidden rounded-2xl border border-vault-border bg-vault-surface shadow-[var(--card-elev-shadow)] backdrop-blur-xl"
+      className="group relative overflow-hidden rounded-2xl border border-vault-border bg-vault-surface shadow-[var(--card-elev-shadow)] backdrop-blur-xl transition-shadow duration-300 hover:shadow-lg"
       style={{ boxShadow: `0 0 0 1px ${p.accentSoft} inset, var(--card-elev-shadow)` }}
     >
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-white/[0.06] via-transparent to-transparent opacity-60 dark:from-white/[0.04]" />
@@ -54,14 +59,13 @@ export function CommandRow({ cmd, index = 0 }: { cmd: Command; index?: number })
         role="button"
         tabIndex={0}
         className="relative flex w-full cursor-pointer items-start gap-3 p-4 text-left outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50 dark:focus-visible:ring-white/25"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => setShowSheet(true)}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            setOpen((v) => !v);
+            setShowSheet(true);
           }
         }}
-        aria-expanded={open}
       >
         <div className="min-w-0 flex-1 space-y-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -93,53 +97,42 @@ export function CommandRow({ cmd, index = 0 }: { cmd: Command; index?: number })
           >
             <BookmarkIcon filled={saved} className="opacity-90" size={20} />
           </button>
-          <button
-            type="button"
-            className="grid h-11 w-11 place-items-center rounded-xl bg-vault-pill-bg ring-1 ring-vault-border transition hover:bg-vault-muted/15 active:scale-[0.96] dark:hover:bg-white/10"
-            onClick={(e) => {
-              e.stopPropagation();
-              void copyText(cmd.name);
-            }}
-            aria-label={`Copy ${cmd.name}`}
-          >
-            <CopyIcon className="text-vault-fg opacity-85" size={20} />
-          </button>
-          <motion.span
-            animate={{ rotate: open ? 180 : 0 }}
+          <div className="relative">
+            <AnimatePresence>
+              {copied && (
+                <motion.span
+                  initial={{ opacity: 0, y: 4, scale: 0.8 }}
+                  animate={{ opacity: 1, y: -24, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8 }}
+                  className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-lg bg-vault-fg px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-vault-bg shadow-xl"
+                >
+                  Copied!
+                </motion.span>
+              )}
+            </AnimatePresence>
+            <button
+              type="button"
+              className="grid h-11 w-11 place-items-center rounded-xl bg-vault-pill-bg ring-1 ring-vault-border transition hover:bg-vault-muted/15 active:scale-[0.96] dark:hover:bg-white/10"
+              onClick={(e) => {
+                e.stopPropagation();
+                void copyText(cmd.name);
+              }}
+              aria-label={`Copy ${cmd.name}`}
+            >
+              <CopyIcon className="text-vault-fg opacity-85" size={20} />
+            </button>
+          </div>
+          <span
             className="grid h-11 w-11 place-items-center rounded-xl text-vault-subtle ring-1 ring-transparent transition group-hover:bg-vault-scrim"
             aria-hidden
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-              <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+              <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
-          </motion.span>
+          </span>
         </div>
       </div>
-      <AnimatePresence initial={false}>
-        {open ? (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-            className="overflow-hidden border-t border-vault-border"
-          >
-            <div className="space-y-3 p-4 pt-3">
-              <p className="text-sm leading-relaxed text-vault-muted">{cmd.detail}</p>
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-1.5 rounded-xl bg-vault-muted/20 px-3 py-1.5 text-xs font-semibold text-vault-fg ring-1 ring-vault-border hover:bg-vault-pill-bg active:scale-[0.98] dark:bg-white/10 dark:hover:bg-white/14"
-                  onClick={() => void copyText(cmd.detail)}
-                >
-                  <CopyIcon className="text-vault-muted" size={14} />
-                  Copy details
-                </button>
-              </div>
-            </div>
-          </motion.div>
-        ) : null}
-      </AnimatePresence>
+      <CommandDetailSheet cmd={showSheet ? cmd : null} onClose={() => setShowSheet(false)} />
     </motion.article>
   );
 }
