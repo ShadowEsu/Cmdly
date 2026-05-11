@@ -18,6 +18,36 @@ type StagedUpload = {
 };
 
 const MAX_IMAGES_FOR_API = 6;
+const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 MB
+
+const ACCEPTED_TYPES = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/heic',
+  'image/heif',
+]);
+
+function isAllowedFile(file: File): boolean {
+  if (ACCEPTED_TYPES.has(file.type)) return true;
+  return /\.(pdf|jpg|jpeg|png|heic|heif)$/i.test(file.name);
+}
+
+function isPdf(file: File): boolean {
+  return file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+}
+
+function isImage(file: File): boolean {
+  return (
+    file.type.startsWith('image/') ||
+    /\.(jpg|jpeg|png|heic|heif)$/i.test(file.name)
+  );
+}
+
+function formatBytes(bytes: number): string {
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
 
 /**
  * Example Gradescope UI screenshots (user-provided). Static files live in
@@ -45,9 +75,6 @@ async function fileToBase64Inline(file: File): Promise<{ mimeType: string; data:
 }
 
 export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string) => void }) {
-  /** Single optional box — rubric, marks, and feedback are inferred from the upload by default. */
-  const [extraNotes, setExtraNotes] = useState('');
-
   const [showAdvocate, setShowAdvocate] = useState(false);
   const [loading, setLoading] = useState(false);
   const [securityError, setSecurityError] = useState<string | null>(null);
@@ -82,25 +109,34 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
 
   const handleFiles = (files: FileList | null) => {
     if (!files?.length) return;
+    setSecurityError(null);
 
     for (const file of Array.from(files)) {
-      const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
-      const isImage = file.type.startsWith('image/');
+      // Size check first
+      if (file.size > MAX_FILE_BYTES) {
+        setSecurityError(
+          `"${file.name}" is ${formatBytes(file.size)} — too large. Please compress it or take a screenshot under 20 MB.`,
+        );
+        continue;
+      }
 
-      if (!isPdf && !isImage) {
-        if (file.name.match(/\.(doc|docx)$/i)) {
+      // Format check
+      if (!isAllowedFile(file)) {
+        if (/\.(doc|docx)$/i.test(file.name)) {
           setSecurityError(
-            'Word (.doc / .docx) files are not read here yet. Save as PDF or type the main points in optional notes.',
+            `Word files aren't supported. Open "${file.name}" and save it as a PDF, then upload that instead.`,
           );
         } else {
-          setSecurityError(`Unsupported file: ${file.name}. Use a PDF or an image (PNG, JPG, etc.).`);
+          setSecurityError(
+            `"${file.name}" isn't a supported format. Upload a PDF or a photo (JPG, PNG, or HEIC).`,
+          );
         }
         continue;
       }
 
       const id = crypto.randomUUID();
       let previewUrl: string | undefined;
-      if (isImage) {
+      if (isImage(file)) {
         previewUrl = URL.createObjectURL(file);
         previewUrlsRef.current.add(previewUrl);
       }
@@ -110,12 +146,12 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
         file,
         progress: 0,
         previewUrl,
-        pdfStatus: isPdf ? 'loading' : 'idle',
+        pdfStatus: isPdf(file) ? 'loading' : 'idle',
       };
 
       setStagedUploads((prev) => [...prev, entry]);
 
-      if (isPdf) {
+      if (isPdf(file)) {
         void (async () => {
           try {
             const { extractTextFromPdfFile } = await import('../lib/pdfText');
@@ -134,7 +170,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
                       ...s,
                       pdfStatus: 'error',
                       pdfError:
-                        'Could not read this PDF. Try a screenshot/image or paste the text.',
+                        'Could not read this PDF. Try a screenshot instead — JPG or PNG work great.',
                       progress: 100,
                     }
                   : s,
@@ -178,67 +214,43 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
 
   const handleSubmit = async () => {
     const pdfLoading = stagedUploads.some(
-      (s) => s.file.type === 'application/pdf' && s.pdfStatus === 'loading',
+      (s) => isPdf(s.file) && s.pdfStatus === 'loading',
     );
     if (pdfLoading) {
-      setSecurityError('Still reading your PDF… wait a few seconds, then tap Analyze again.');
+      setSecurityError('Still reading your PDF — wait a moment, then tap Analyze again.');
       return;
     }
 
     const pdfFailed = stagedUploads.some((s) => s.pdfStatus === 'error');
     const hasRecoverablePdfText = stagedUploads.some((s) => (s.pdfText?.length ?? 0) > 0);
-    const hasImageEvidence = stagedUploads.some((s) => s.file.type.startsWith('image/'));
-    if (pdfFailed && !hasRecoverablePdfText && !hasImageEvidence && !extraNotes.trim()) {
+    const hasImageEvidence = stagedUploads.some((s) => isImage(s.file));
+    if (pdfFailed && !hasRecoverablePdfText && !hasImageEvidence) {
       setSecurityError(
-        'PDF text could not be extracted. Add a photo/screenshot of the graded work or type a quick note below, then try again.',
+        'PDF text could not be extracted. Add a photo or screenshot of the graded work and try again.',
       );
       return;
     }
 
-    const imageFiles = stagedUploads.filter((s) => s.file.type.startsWith('image/'));
+    const imageFiles = stagedUploads.filter((s) => isImage(s.file));
     const pdfTexts = stagedUploads.map((s) => s.pdfText).filter((t): t is string => !!t && t.length > 0);
 
     const hasPdfText = pdfTexts.length > 0;
-    const notes = extraNotes.trim();
-    const hasTypedContext = notes.length > 0;
 
-    if (!hasTypedContext && !hasImageEvidence && !hasPdfText) {
+    if (!hasImageEvidence && !hasPdfText) {
       setSecurityError(
-        'Add a PDF or photo of your graded worksheet (Gradescope, Canvas, or marked paper), or type a short note about the class/assignment — then tap Analyze.',
+        'Add a PDF or photo of your graded work, then tap Analyze.',
       );
       return;
     }
 
-    const assignmentBlock = [
-      ...pdfTexts.map((t, i) => `--- Text extracted from uploaded PDF ${i + 1} ---\n${t}`),
-      notes
-        ? `--- Notes from student (optional) ---\n${notes}`
-        : '',
-    ]
-      .filter(Boolean)
+    const assignmentBlock = pdfTexts
+      .map((t, i) => `--- Text extracted from uploaded PDF ${i + 1} ---\n${t}`)
       .join('\n\n');
 
-    const inferFromUpload =
-      hasImageEvidence || hasPdfText
-        ? '(Infer from the uploaded worksheet: assignment prompt, rubric, scores, and instructor comments — student did not paste these separately.)'
-        : '';
+    const inferFromUpload = '(Infer from the uploaded worksheet: assignment prompt, rubric, scores, and instructor comments — student did not paste these separately.)';
 
-    const rubricBlock =
-      hasTypedContext && !hasImageEvidence && !hasPdfText
-        ? '(Student notes only — extract any rubric or criteria mentioned in the notes.)'
-        : inferFromUpload || '(No separate rubric text.)';
-
-    const feedbackBlock =
-      hasTypedContext && !hasImageEvidence && !hasPdfText
-        ? '(Student notes only — extract instructor feedback from the notes if any.)'
-        : inferFromUpload || '(No separate feedback text.)';
-
-    if (!assignmentBlock && !hasImageEvidence) {
-      setSecurityError(
-        'Upload a clear file of your graded work, or add a bit more in the optional notes box.',
-      );
-      return;
-    }
+    const rubricBlock = inferFromUpload;
+    const feedbackBlock = inferFromUpload;
 
     setLoading(true);
     setSecurityError(null);
@@ -286,7 +298,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
         facultyReview: false,
         analysis: analysisResult,
         rawInput: {
-          assignment: notes + (pdfTexts.length ? `\n[${pdfTexts.length} PDF(s) extracted]` : ''),
+          assignment: pdfTexts.length ? `[${pdfTexts.length} PDF(s) extracted]` : '',
           rubric: '',
           feedback: '',
         },
@@ -297,7 +309,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
       setSecurityError(
         err instanceof Error
           ? err.message
-          : 'Analysis failed. Please check that your text is readable and try again.',
+          : 'Analysis failed. Please check that your file is readable and try again.',
       );
     } finally {
       setLoading(false);
@@ -308,6 +320,10 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
     return <Advocate onBack={() => setShowAdvocate(false)} />;
   }
 
+  const worksheetReady =
+    stagedUploads.some((s) => (s.pdfText?.length ?? 0) > 0) ||
+    stagedUploads.some((s) => isImage(s.file));
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 relative max-w-7xl mx-auto">
       <div className="lg:col-span-8 space-y-8">
@@ -316,8 +332,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
             Upload your graded worksheet
           </h1>
           <p className="text-base md:text-lg text-on-surface-variant/85 font-serif leading-relaxed max-w-2xl text-center md:text-left">
-            One <strong className="font-medium text-primary">PDF or photo</strong> is enough — the AI reads scores, rubric, and comments from it.
-            Add a line or two below only if something important isn&apos;t visible on the file.
+            One <strong className="font-medium text-primary">PDF or photo</strong> is enough — the AI reads scores, rubric, and comments from it automatically.
           </p>
         </section>
 
@@ -329,7 +344,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-primary/5 pb-5">
             <div>
               <h2 className="font-serif text-xl md:text-2xl text-primary font-medium tracking-tight">File</h2>
-              <p className="text-[11px] text-primary/50 mt-0.5">Gradescope, Canvas, or paper — tap or drag here</p>
+              <p className="text-[11px] text-primary/50 mt-0.5">PDF, JPG, PNG, or HEIC — tap or drag here</p>
             </div>
             <button
               type="button"
@@ -480,7 +495,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
                   <p className="text-[11px] font-bold uppercase tracking-wider text-primary/45 mb-1">Blackboard</p>
                   <p>
                     <strong className="font-semibold text-primary">My Grades</strong> → the item → view attempt / feedback. Save any
-                    returned file; if it’s only on screen, capture or print that view to PDF.
+                    returned file; if it's only on screen, capture or print that view to PDF.
                   </p>
                 </div>
                 <div className="rounded-lg border border-primary/10 bg-white/80 px-3 py-2.5">
@@ -522,6 +537,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
             ) : null}
           </div>
 
+          {/* Drop zone */}
           <div
             onDragOver={onDragOver}
             onDragLeave={onDragLeave}
@@ -535,7 +551,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
               id="file-upload-1"
               type="file"
               className="hidden"
-              accept=".pdf,image/*"
+              accept=".pdf,.jpg,.jpeg,.png,.heic,.heif"
               multiple
               onChange={(e) => {
                 handleFiles(e.target.files);
@@ -545,69 +561,103 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
             <div className="bg-white p-3 rounded-xl shadow-md shadow-primary/10">
               <ICONS.Upload className="text-primary w-7 h-7" />
             </div>
-            <p className="font-serif text-lg text-primary font-medium">Drop or choose PDF / photo</p>
-            <p className="text-[11px] text-primary/45 max-w-sm">Screenshots work. No account for the file — we analyze what you upload.</p>
+            <p className="font-serif text-lg text-primary font-medium">Drop or choose a file</p>
+            <p className="text-[11px] text-primary/45 max-w-sm">PDF · JPG · PNG · HEIC &nbsp;·&nbsp; up to 20 MB per file</p>
           </div>
 
-          {stagedUploads.length > 0 && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {stagedUploads.map((u) => (
-                <div
-                  key={u.id}
-                  className="relative rounded-xl border border-primary/10 bg-white overflow-hidden shadow-sm"
-                >
-                  {u.previewUrl ? (
-                    <img src={u.previewUrl} alt="" className="w-full h-40 object-contain bg-black/[0.03]" />
-                  ) : (
-                    <div className="h-40 flex flex-col items-center justify-center gap-1.5 bg-primary/[0.03] p-3">
-                      <ICONS.FileText className="text-primary/35 w-8 h-8" />
-                      <p className="text-[10px] font-mono text-primary/45 text-center px-2 truncate w-full">{u.file.name}</p>
-                      {u.pdfStatus === 'loading' && (
-                        <p className="text-xs text-primary/55">Reading PDF…</p>
-                      )}
-                      {u.pdfStatus === 'done' && u.pdfText && (
-                        <p className="text-[10px] text-secondary font-bold uppercase">
-                          {u.pdfText.length.toLocaleString()} chars
-                        </p>
-                      )}
-                      {u.pdfStatus === 'error' && (
-                        <p className="text-[10px] text-red-600 text-center px-2">{u.pdfError}</p>
-                      )}
-                    </div>
-                  )}
-                  <div className="p-2.5 flex items-center justify-between gap-2 border-t border-primary/5">
-                    <span className="text-[10px] text-primary/45 truncate">{u.file.name}</span>
-                    <button
-                      type="button"
-                      onClick={() => removeFile(u.id)}
-                      className="text-[10px] font-bold uppercase text-red-600 hover:underline shrink-0"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                  {u.progress < 100 && u.pdfStatus !== 'loading' && (
-                    <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary/10">
-                      <div className="h-full bg-primary transition-all" style={{ width: `${u.progress}%` }} />
-                    </div>
-                  )}
+          {/* Staged uploads preview */}
+          <AnimatePresence>
+            {stagedUploads.length > 0 && (
+              <motion.div
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -8 }}
+                className="space-y-3"
+              >
+                <p className="text-[11px] font-bold uppercase tracking-widest text-primary/40">
+                  {stagedUploads.length === 1 ? 'Your file — looks right?' : `Your files (${stagedUploads.length}) — do these look right?`}
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {stagedUploads.map((u) => {
+                    const done = u.progress >= 100 || u.pdfStatus === 'done' || u.pdfStatus === 'error';
+                    const uploading = !done;
+
+                    return (
+                      <motion.div
+                        key={u.id}
+                        initial={{ opacity: 0, scale: 0.97 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="relative rounded-xl border border-primary/10 bg-white overflow-hidden shadow-sm"
+                      >
+                        {/* Preview area */}
+                        {u.previewUrl ? (
+                          <img src={u.previewUrl} alt="" className="w-full h-44 object-contain bg-black/[0.03]" />
+                        ) : (
+                          <div className="h-44 flex flex-col items-center justify-center gap-2 bg-primary/[0.03] p-4">
+                            <ICONS.FileText className="text-primary/30 w-9 h-9" />
+                            <p className="text-[11px] font-mono text-primary/50 text-center px-2 truncate w-full">{u.file.name}</p>
+                            {u.pdfStatus === 'loading' && (
+                              <p className="text-xs text-primary/55 font-medium">Reading PDF…</p>
+                            )}
+                            {u.pdfStatus === 'done' && u.pdfText && (
+                              <p className="text-[10px] text-secondary font-bold uppercase tracking-widest">
+                                {u.pdfText.length.toLocaleString()} chars extracted
+                              </p>
+                            )}
+                            {u.pdfStatus === 'error' && (
+                              <p className="text-[10px] text-red-600 text-center px-2 leading-snug">{u.pdfError}</p>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Progress bar — visible while uploading/reading */}
+                        {uploading && (
+                          <div className="px-3 pt-2 pb-1">
+                            <div className="flex items-center justify-between mb-1">
+                              <span className="text-[10px] text-primary/45 font-medium">
+                                {u.pdfStatus === 'loading' ? 'Reading…' : 'Uploading…'}
+                              </span>
+                              <span className="text-[10px] text-primary/45 font-mono tabular-nums">
+                                {Math.round(u.progress)}%
+                              </span>
+                            </div>
+                            <div className="w-full h-2 rounded-full bg-primary/10 overflow-hidden">
+                              <motion.div
+                                className="h-full rounded-full bg-primary"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${u.progress}%` }}
+                                transition={{ ease: 'easeOut' }}
+                              />
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Footer */}
+                        <div className="px-3 py-2.5 flex items-center justify-between gap-2 border-t border-primary/5">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            {done && u.pdfStatus !== 'error' && (
+                              <span className="shrink-0 w-4 h-4 rounded-full bg-secondary flex items-center justify-center">
+                                <ICONS.Check className="text-white w-2.5 h-2.5" strokeWidth={3} />
+                              </span>
+                            )}
+                            <span className="text-[10px] text-primary/45 truncate">{u.file.name}</span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeFile(u.id)}
+                            className="text-[10px] font-bold uppercase tracking-wider text-red-500 hover:text-red-700 shrink-0 transition-colors"
+                          >
+                            Remove
+                          </button>
+                        </div>
+                      </motion.div>
+                    );
+                  })}
                 </div>
-              ))}
-            </div>
-          )}
-
-          <div className="space-y-2 pt-2 border-t border-primary/5">
-            <label className="text-xs font-semibold text-primary/55">
-              Optional — only if the worksheet doesn&apos;t show everything
-            </label>
-            <textarea
-              value={extraNotes}
-              onChange={(e) => setExtraNotes(e.target.value)}
-              maxLength={8000}
-              rows={3}
-              className="w-full bg-white border border-primary/10 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/20 resize-y text-primary/85 placeholder:text-primary/30"
-              placeholder="e.g. course name, which question you’re appealing, or text that’s cut off in the photo…"
-            />
-          </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </motion.div>
 
         {securityError && (
@@ -618,7 +668,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           >
             <ICONS.ShieldAlert size={24} className="flex-shrink-0" />
             <div>
-              <p className="text-sm font-bold uppercase tracking-widest mb-1">Please review your input</p>
+              <p className="text-sm font-bold uppercase tracking-widest mb-1">Heads up</p>
               <p className="text-xs font-serif italic">{securityError}</p>
             </div>
           </motion.div>
@@ -632,7 +682,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           <button
             type="button"
             onClick={handleSubmit}
-            disabled={loading}
+            disabled={loading || !worksheetReady}
             className="w-full sm:w-auto flex items-center justify-center gap-3 bg-primary text-white px-10 py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] hover:shadow-xl hover:shadow-primary/20 transition-all disabled:opacity-50"
           >
             {loading ? 'Analyzing…' : 'Analyze worksheet'}
@@ -647,88 +697,42 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           <h3 className="font-serif text-2xl text-primary">Your Checklist</h3>
 
           {(() => {
-            const hasPdfText = stagedUploads.some((s) => (s.pdfText?.length ?? 0) > 0);
-            const hasImages = stagedUploads.some((s) => s.file.type.startsWith('image/'));
-            const notesTrim = extraNotes.trim().length > 0;
-            const worksheetOk = hasPdfText || hasImages;
-
-            type RowState = 'done' | 'optional' | 'needed';
-            const fileRow: RowState = worksheetOk ? 'done' : notesTrim ? 'optional' : 'needed';
-            const notesRow: RowState = notesTrim ? 'done' : worksheetOk ? 'optional' : 'needed';
-
-            const steps: { label: string; state: RowState; hint: string }[] = [
-              {
-                label: 'Graded worksheet (PDF or photo)',
-                state: fileRow,
-                hint:
-                  fileRow === 'done'
-                    ? 'AI will read marks, rubric, and comments from this'
-                    : fileRow === 'optional'
-                      ? 'You typed context only — a photo/PDF still helps a lot'
-                      : 'Add your marked work, or type what you have in optional notes',
-              },
-              {
-                label: 'Extra notes',
-                state: notesRow,
-                hint:
-                  notesRow === 'done'
-                    ? 'Added — thanks, that helps'
-                    : notesRow === 'optional'
-                      ? 'Skipping is fine if the file shows everything'
-                      : 'Optional — use if something’s missing from the file',
-              },
-            ];
-
-            const rowScore = (state: RowState) => (state === 'done' || state === 'optional' ? 1 : 0);
-            const pct = Math.round(((rowScore(fileRow) + rowScore(notesRow)) / 2) * 100);
+            const pct = worksheetReady ? 100 : 0;
 
             return (
               <>
                 <div className="space-y-8 relative">
                   <div className="absolute left-[15px] top-4 bottom-4 w-[1px] bg-primary/10" />
-                  {steps.map((s, i) => (
+                  <div className="flex gap-6 relative">
                     <div
-                      key={i}
-                      className={`flex gap-6 relative transition-opacity ${
-                        s.state === 'needed' && i > 0 && steps[i - 1].state === 'needed' ? 'opacity-30' : ''
+                      className={`w-8 h-8 rounded-full flex items-center justify-center z-10 shrink-0 transition-colors ${
+                        worksheetReady
+                          ? 'bg-secondary'
+                          : 'bg-on-surface-variant/10 border border-on-surface-variant/20'
                       }`}
                     >
-                      <div
-                        className={`w-8 h-8 rounded-full flex items-center justify-center z-10 shrink-0 transition-colors ${
-                          s.state === 'done'
-                            ? 'bg-secondary'
-                            : s.state === 'optional'
-                              ? 'bg-amber-100 border-2 border-amber-400/80'
-                              : 'bg-on-surface-variant/10 border border-on-surface-variant/20'
+                      {worksheetReady ? (
+                        <ICONS.Check className="text-white w-4 h-4" />
+                      ) : (
+                        <div className="w-2 h-2 rounded-full bg-on-surface-variant" />
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p
+                        className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${
+                          worksheetReady ? 'text-secondary' : 'text-primary/40'
                         }`}
                       >
-                        {s.state === 'done' ? (
-                          <ICONS.Check className="text-white w-4 h-4" />
-                        ) : s.state === 'optional' ? (
-                          <ICONS.Zap className="text-amber-700 w-4 h-4" strokeWidth={2} />
-                        ) : (
-                          <div className="w-2 h-2 rounded-full bg-on-surface-variant" />
-                        )}
-                      </div>
-                      <div className="min-w-0">
-                        <p
-                          className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${
-                            s.state === 'done'
-                              ? 'text-secondary'
-                              : s.state === 'optional'
-                                ? 'text-amber-800'
-                                : 'text-primary/40'
-                          }`}
-                        >
-                          {s.state === 'done' ? 'Done' : s.state === 'optional' ? 'Optional' : 'Needed'}
-                        </p>
-                        <p className="text-sm font-bold text-primary">{s.label}</p>
-                        {s.hint ? (
-                          <p className="text-[11px] text-on-surface-variant opacity-75 leading-snug mt-0.5">{s.hint}</p>
-                        ) : null}
-                      </div>
+                        {worksheetReady ? 'Done' : 'Needed'}
+                      </p>
+                      <p className="text-sm font-bold text-primary">Graded worksheet (PDF or photo)</p>
+                      <p className="text-[11px] text-on-surface-variant opacity-75 leading-snug mt-0.5">
+                        {worksheetReady
+                          ? 'AI will read marks, rubric, and comments from this'
+                          : 'Add your marked work above to get started'}
+                      </p>
                     </div>
-                  ))}
+                  </div>
                 </div>
 
                 <div className="pt-8 border-t border-primary/5">
@@ -755,14 +759,14 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           </div>
         </div>
 
-        <motion.div 
+        <motion.div
           whileHover={{ scale: 1.02 }}
           onClick={() => setShowAdvocate(true)}
           className="glass-panel rounded-2xl overflow-hidden aspect-[4/3] relative group cursor-pointer"
         >
-          <img 
-            src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800" 
-            alt="Help" 
+          <img
+            src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800"
+            alt="Help"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-primary to-transparent opacity-80" />
