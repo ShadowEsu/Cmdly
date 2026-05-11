@@ -33,68 +33,67 @@ export default function VerdictReport({ caseId }: { caseId: string | null }) {
       : null;
 
   return (
-    <div className="space-y-24 max-w-7xl mx-auto">
+    <div className="space-y-12 sm:space-y-16 md:space-y-24 max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
       {/* Hero Verdict */}
-      <section className="space-y-16 py-12">
-        <div className="flex items-center gap-6">
-          <div className="h-px bg-primary/20 w-32" />
-          <span className="text-[13px] sm:text-sm font-light tracking-[0.45em] text-primary opacity-50 uppercase">
+      <section className="space-y-8 sm:space-y-12 md:space-y-16 py-6 sm:py-8 md:py-12">
+        <div className="flex items-center gap-3 sm:gap-6">
+          <div className="h-px bg-primary/20 w-8 sm:w-16 md:w-32" />
+          <span className="text-[10px] sm:text-[13px] md:text-sm font-light tracking-[0.45em] text-primary opacity-50 uppercase whitespace-nowrap">
             Case ID: {currentCase?.ref || '—'}
           </span>
         </div>
-        
-        <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl text-primary font-light leading-none tracking-tight -ml-2">
+
+        <h1 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-primary font-light leading-tight sm:leading-none tracking-tight -ml-1 sm:-ml-2 break-words">
           Audit <span className="font-light italic text-primary/60 block lg:inline">Verdict</span>
         </h1>
 
-        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-12 border-t border-primary/10 pt-12">
-          <div className="space-y-6 max-w-4xl">
-            <h2 className="font-serif text-4xl md:text-6xl text-primary font-light uppercase tracking-tight leading-none">
+        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 sm:gap-8 md:gap-12 border-t border-primary/10 pt-6 sm:pt-8 md:pt-12">
+          <div className="space-y-3 sm:space-y-4 md:space-y-6 max-w-4xl">
+            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-6xl text-primary font-light uppercase tracking-tight leading-tight sm:leading-none break-words">
               {analysis?.case_analysis.overall_case_strength === 'strong' ? 'Strong Grounds for Appeal' :
                analysis?.case_analysis.overall_case_strength === 'moderate' ? 'Some Grounds for Appeal' :
                analysis?.case_analysis.overall_case_strength === 'weak' ? 'Limited Grounds for Appeal' : 'Analyzing Your Case'}
             </h2>
-            <p className="text-2xl md:text-3xl text-primary/70 font-serif italic leading-relaxed font-medium">
+            <p className="text-sm sm:text-lg md:text-2xl lg:text-3xl text-primary/70 font-serif italic leading-relaxed font-medium">
               {analysis?.case_analysis.case_strength_reason || "Review the findings below to understand your options."}
             </p>
           </div>
-          
-          <div className="flex flex-col items-center xl:items-end gap-2 bg-primary/[0.03] p-8 sm:p-10 rounded-[3rem] border border-primary/10 max-w-full">
-            <div className="text-[11px] font-light uppercase tracking-[0.32em] text-primary/50 mb-1 text-center xl:text-right">
+
+          <div className="flex flex-col items-center xl:items-end gap-2 bg-primary/[0.03] p-4 sm:p-6 md:p-8 lg:p-10 rounded-lg sm:rounded-2xl lg:rounded-[3rem] border border-primary/10 max-w-full flex-shrink-0">
+            <div className="text-[10px] sm:text-[11px] font-light uppercase tracking-[0.32em] text-primary/50 mb-1 text-center xl:text-right">
               Possible point issues flagged
             </div>
             {analysis && recoverablePts > 0 ? (
-              <div className="flex items-baseline gap-3">
-                <span className="text-6xl sm:text-7xl md:text-8xl font-serif font-light text-primary tracking-tight leading-none">
+              <div className="flex items-baseline gap-2 sm:gap-3">
+                <span className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-serif font-light text-primary tracking-tight leading-none">
                   +{recoverablePts}
                 </span>
-                <span className="text-xl font-serif font-light text-primary/50 italic">pts</span>
+                <span className="text-base sm:text-lg md:text-xl font-serif font-light text-primary/50 italic">pts</span>
               </div>
             ) : analysis ? (
-              <p className="font-serif text-lg sm:text-xl font-light text-primary/65 text-center xl:text-right max-w-sm leading-snug">
-                No extra points were automatically estimated from the text you supplied. That does not mean an appeal is
-                impossible—only that the model did not find a clear arithmetic or rubric mismatch.
+              <p className="font-serif text-xs sm:text-sm md:text-lg lg:text-xl font-light text-primary/65 text-center xl:text-right max-w-sm leading-snug">
+                No extra points were automatically estimated from the text you supplied. That does not mean an appeal is impossible—only that the model did not find a clear arithmetic or rubric mismatch.
               </p>
             ) : (
-              <p className="font-serif text-base font-light text-primary/50">Loading analysis…</p>
+              <p className="font-serif text-xs sm:text-base font-light text-primary/50">Loading analysis…</p>
             )}
-            <p className="text-[10px] font-light uppercase tracking-[0.28em] text-primary/40 mt-3 text-center xl:text-right leading-relaxed">
+            <p className="text-[9px] sm:text-[10px] font-light uppercase tracking-[0.28em] text-primary/40 mt-2 sm:mt-3 text-center xl:text-right leading-relaxed">
               Not a grade guarantee — educational review only
             </p>
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-6 pt-12">
+        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 md:gap-6 pt-6 sm:pt-8 md:pt-12">
           <button
             type="button"
-            className="bg-primary text-white px-10 sm:px-16 py-6 sm:py-8 rounded-[2.5rem] font-light uppercase tracking-[0.32em] text-[11px] sm:text-xs hover:shadow-[0_20px_50px_rgba(0,35,111,0.3)] hover:-translate-y-1 transition-all flex items-center gap-6 group w-full sm:w-auto justify-center"
+            className="bg-primary text-white px-4 sm:px-10 md:px-12 lg:px-16 py-3 sm:py-5 md:py-6 lg:py-8 rounded-lg sm:rounded-2xl md:rounded-[2.5rem] font-light uppercase tracking-[0.32em] text-[10px] sm:text-[11px] md:text-xs hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 sm:gap-4 md:gap-6 group min-h-11 sm:min-h-12 md:min-h-14"
           >
             Write appeal letter
-            <ICONS.ArrowRight className="w-5 h-5 group-hover:translate-x-3 transition-transform" />
+            <ICONS.ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
           </button>
           <button
             type="button"
-            className="bg-white border-2 border-primary/10 text-primary px-10 sm:px-16 py-6 sm:py-8 rounded-[2.5rem] font-light uppercase tracking-[0.32em] text-[11px] sm:text-xs hover:bg-primary/5 transition-all w-full sm:w-auto"
+            className="bg-white border-2 border-primary/10 text-primary px-4 sm:px-10 md:px-12 lg:px-16 py-3 sm:py-5 md:py-6 lg:py-8 rounded-lg sm:rounded-2xl md:rounded-[2.5rem] font-light uppercase tracking-[0.32em] text-[10px] sm:text-[11px] md:text-xs hover:bg-primary/5 active:scale-[0.98] transition-all min-h-11 sm:min-h-12 md:min-h-14 flex-grow sm:flex-grow-0"
           >
             Download evidence
           </button>
