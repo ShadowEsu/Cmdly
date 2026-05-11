@@ -17,14 +17,14 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
   }, [caseId]);
 
   return (
-    <div className="space-y-24 max-w-7xl mx-auto">
+    <div className="space-y-12 sm:space-y-16 md:space-y-24 max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
       {/* Evidence Bento Section */}
-      <section className="space-y-10">
-        <div className="flex items-center gap-6">
+      <section className="space-y-6 sm:space-y-8 md:space-y-10">
+        <div className="flex items-center gap-3 sm:gap-4 md:gap-6">
           <div className="flex-1 h-px bg-primary/10" />
           <div className="text-center">
-            <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/40 block mb-3">Analysis Summary</span>
-            <h2 className="font-serif text-5xl md:text-6xl text-primary font-light tracking-tight">Your Case</h2>
+            <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.4em] text-primary/40 block mb-2 sm:mb-3">Analysis Summary</span>
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl text-primary font-light tracking-tight break-words">Your Case</h2>
           </div>
           <div className="flex-1 h-px bg-primary/10" />
         </div>
@@ -33,36 +33,35 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-panel rounded-[2.5rem] p-10 md:p-12 border border-primary/10 bg-white space-y-8"
+            className="glass-panel rounded-lg sm:rounded-xl md:rounded-2xl lg:rounded-[2.5rem] p-4 sm:p-6 md:p-8 lg:p-10 border border-primary/10 bg-white space-y-4 sm:space-y-6 md:space-y-8"
           >
-            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-              <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary/40 mb-2">From your materials</p>
-                <h3 className="font-serif text-3xl md:text-4xl text-primary font-light tracking-tight">
+            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-4 sm:gap-6">
+              <div className="min-w-0">
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.35em] text-primary/40 mb-1 sm:mb-2">From your materials</p>
+                <h3 className="font-serif text-xl sm:text-2xl md:text-3xl lg:text-4xl text-primary font-light tracking-tight break-words">
                   {currentCase.analysis.assignment.title || currentCase.title || 'Your submission'}
                 </h3>
                 {currentCase.analysis.assignment.subject && (
-                  <p className="text-sm text-primary/50 font-serif italic mt-1">{currentCase.analysis.assignment.subject}</p>
+                  <p className="text-xs sm:text-sm text-primary/50 font-serif italic mt-1">{currentCase.analysis.assignment.subject}</p>
                 )}
               </div>
-              <div className="text-left md:text-right space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary/40">Score (as read by AI)</p>
-                <p className="font-serif text-2xl text-primary font-medium">
+              <div className="text-left md:text-right space-y-0.5 sm:space-y-1 flex-shrink-0">
+                <p className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-primary/40">Score (as read by AI)</p>
+                <p className="font-serif text-lg sm:text-xl md:text-2xl text-primary font-medium whitespace-nowrap">
                   {currentCase.analysis.assignment.total_score_display ||
                     (currentCase.analysis.assignment.total_score_earned != null &&
                     currentCase.analysis.assignment.total_score_possible != null
                       ? `${currentCase.analysis.assignment.total_score_earned} / ${currentCase.analysis.assignment.total_score_possible}`
-                      : 'See question breakdown')}
+                      : 'See breakdown')}
                 </p>
-                <p className="text-xs text-on-surface-variant">
+                <p className="text-[10px] sm:text-xs text-on-surface-variant leading-snug">
                   Case strength:{' '}
                   <span className="font-bold text-primary uppercase tracking-wide">
                     {currentCase.analysis.case_analysis.overall_case_strength}
                   </span>
                   {typeof currentCase.analysis.confidence?.overall_confidence === 'number' && (
                     <span className="text-primary/50">
-                      {' '}
-                      · Confidence {Math.round(currentCase.analysis.confidence.overall_confidence * 100)}%
+                      {' '}· Conf {Math.round(currentCase.analysis.confidence.overall_confidence * 100)}%
                     </span>
                   )}
                 </p>
@@ -70,7 +69,7 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
             </div>
 
             {currentCase.analysis.case_analysis?.case_strength_reason && (
-              <p className="text-sm text-primary/70 font-serif italic leading-relaxed border-l-4 border-secondary/40 pl-4">
+              <p className="text-xs sm:text-sm text-primary/70 font-serif italic leading-relaxed border-l-4 border-secondary/40 pl-3 sm:pl-4">
                 {currentCase.analysis.case_analysis.case_strength_reason}
               </p>
             )}
@@ -106,7 +105,7 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
           </motion.div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8 lg:gap-12">
           {[
             {
               icon: ICONS.Check,
@@ -137,20 +136,20 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
               color: 'text-[#735c00] bg-[#735c00]/5'
             }
           ].map((item, idx) => (
-            <motion.div 
+            <motion.div
               key={idx}
               whileHover={{ y: -12, scale: 1.02 }}
-              className="glass-panel p-12 rounded-[3.5rem] flex flex-col gap-10 transition-all duration-500 hover:shadow-huge bg-white border-2 border-primary/5"
+              className="glass-panel p-4 sm:p-6 md:p-8 lg:p-12 rounded-lg sm:rounded-2xl lg:rounded-[3.5rem] flex flex-col gap-4 sm:gap-6 md:gap-8 lg:gap-10 transition-all duration-500 hover:shadow-huge bg-white border-2 border-primary/5 active:scale-[0.98]"
             >
-              <div className="flex justify-between items-start">
-                <div className={`p-4 rounded-2xl ${item.color} shadow-sm`}>
-                  <item.icon size={24} strokeWidth={1.5} />
+              <div className="flex justify-between items-start gap-2">
+                <div className={`p-3 sm:p-4 rounded-lg sm:rounded-2xl ${item.color} shadow-sm flex-shrink-0`}>
+                  <item.icon size={20} strokeWidth={1.5} className="sm:w-6 sm:h-6" />
                 </div>
-                <span className="text-[10px] font-bold tracking-[0.2em] text-primary/40 uppercase font-mono italic">{item.val}</span>
+                <span className="text-[8px] sm:text-[10px] font-bold tracking-[0.2em] text-primary/40 uppercase font-mono italic text-right flex-shrink-0">{item.val}</span>
               </div>
-              <div className="space-y-3">
-                <h3 className="font-serif text-2xl text-primary font-medium tracking-tight uppercase">{item.title}</h3>
-                <p className="text-sm text-primary/60 font-serif italic leading-relaxed">
+              <div className="space-y-2 sm:space-y-3">
+                <h3 className="font-serif text-lg sm:text-xl md:text-2xl text-primary font-medium tracking-tight uppercase break-words">{item.title}</h3>
+                <p className="text-xs sm:text-sm text-primary/60 font-serif italic leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -160,11 +159,11 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
       </section>
 
       {/* Main Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-24">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 sm:gap-16 md:gap-20 lg:gap-24">
         {/* Sidebar Controls */}
-        <div className="lg:col-span-4 space-y-24">
-          <div className="glass-panel p-12 rounded-[3.5rem] space-y-12 bg-primary/[0.02] border-2 border-primary/5 shadow-huge">
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary leading-none">Letter Tone</h4>
+        <div className="lg:col-span-4 space-y-12 sm:space-y-16 md:space-y-20 lg:space-y-24">
+          <div className="glass-panel p-4 sm:p-6 md:p-8 lg:p-12 rounded-lg sm:rounded-2xl lg:rounded-[3.5rem] space-y-6 sm:space-y-8 md:space-y-10 lg:space-y-12 bg-primary/[0.02] border-2 border-primary/5 shadow-lg sm:shadow-huge">
+            <h4 className="text-[9px] sm:text-[10px] font-bold uppercase tracking-[0.4em] text-primary leading-none">Letter Tone</h4>
             
             <div className="space-y-12 relative px-2">
               <div className="h-[4px] bg-primary/10 rounded-full w-full relative">
