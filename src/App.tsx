@@ -4,13 +4,14 @@ import Dashboard from './views/Dashboard';
 import UploadCenter from './views/UploadCenter';
 import EvidenceSummary from './views/EvidenceSummary';
 import VerdictReport from './views/VerdictReport';
+import SubmissionGuide from './views/SubmissionGuide';
 import Profile from './views/Profile';
 import History from './views/History';
 import Advocate from './views/Advocate';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [flowStep, setFlowStep] = useState('none'); // none, summary, verdict
+  const [flowStep, setFlowStep] = useState<'none' | 'summary' | 'verdict' | 'submission'>('none');
   const [currentCaseId, setCurrentCaseId] = useState<string | null>(null);
 
   const handleStartAppeal = () => {
@@ -26,13 +27,20 @@ export default function App() {
     setFlowStep('verdict');
   };
 
+  const handleStartSubmission = () => {
+    setFlowStep('submission');
+  };
+
   const renderContent = () => {
     if (activeTab === 'upload') {
       if (flowStep === 'summary') {
         return <EvidenceSummary caseId={currentCaseId} onFinalize={handleFinalizeVerdict} />;
       }
       if (flowStep === 'verdict') {
-        return <VerdictReport caseId={currentCaseId} />;
+        return <VerdictReport caseId={currentCaseId} onSubmit={handleStartSubmission} />;
+      }
+      if (flowStep === 'submission') {
+        return <SubmissionGuide />;
       }
       return <UploadCenter onSubmit={handleSubmitUpload} />;
     }
