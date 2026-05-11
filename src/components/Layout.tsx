@@ -67,7 +67,7 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
                   <p className="text-sm font-light text-primary uppercase tracking-wide">{firstName}</p>
                 </div>
               )}
-              <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl border-2 border-primary/10 p-0.5 overflow-hidden bg-white shadow-xl transition-all group-hover:border-primary/40 flex-shrink-0">
+              <div className="w-12 h-12 rounded-2xl border-2 border-primary/10 p-0.5 overflow-hidden bg-white shadow-xl transition-all group-hover:border-primary/40 flex-shrink-0">
                 <img
                   src={user?.photoURL || DEFAULT_AVATAR_SRC}
                   alt="Profile"
@@ -100,14 +100,14 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center justify-center gap-1 transition-all flex-1 min-h-14 min-w-0 py-2 px-0.5 rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/30 ${
+              className={`flex flex-col items-center justify-center gap-1 transition-all flex-1 min-h-14 min-w-0 py-2 px-0.5 rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-surface ${
                 activeTab === tab.id ? 'text-primary bg-primary/[0.06]' : 'text-on-surface-variant/45 hover:text-on-surface-variant/70'
               }`}
               aria-label={tab.label}
               aria-current={activeTab === tab.id ? 'page' : undefined}
             >
               <tab.icon className="w-6 h-6 shrink-0" strokeWidth={activeTab === tab.id ? 2.35 : 1.85} />
-              <span className="text-[9px] font-semibold uppercase tracking-wide leading-tight text-center line-clamp-1">
+              <span className="text-sm font-semibold uppercase tracking-wide leading-tight text-center line-clamp-1">
                 {tab.label}
               </span>
             </button>
