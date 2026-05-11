@@ -1,4 +1,11 @@
-export type ApiErrorCode = "BAD_REQUEST" | "UNAUTHORIZED" | "FORBIDDEN" | "NOT_FOUND" | "RATE_LIMITED" | "INTERNAL";
+export type ApiErrorCode =
+  | "BAD_REQUEST"
+  | "UNAUTHORIZED"
+  | "INVALID_TOKEN"
+  | "FORBIDDEN"
+  | "NOT_FOUND"
+  | "RATE_LIMITED"
+  | "INTERNAL";
 
 export class ApiError extends Error {
   readonly status: number;

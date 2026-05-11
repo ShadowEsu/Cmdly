@@ -1,30 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-    <title>Cmdly</title>
-    <script>
-      (function () {
-        try {
-          // Locked to dark mode for a consistent brand feel.
-          document.documentElement.classList.add("dark");
-          document.documentElement.style.colorScheme = "dark";
-        } catch (e) {
-          document.documentElement.classList.add("dark");
-          document.documentElement.style.colorScheme = "dark";
-        }
-      })();
-    </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300..900;1,300..900&family=JetBrains+Mono:wght@400;500;600&display=swap"
-      rel="stylesheet"
-    />
+    <meta name="theme-color" content="#00236f" />
+    <meta name="description" content="Regrade helps students review graded work and draft grade appeals with clear, policy-aware guidance." />
+    <title>Regrade</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <p style="margin: 24px; font-family: system-ui, sans-serif; color: #333">
+        Starting Regrade…
+      </p>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
+

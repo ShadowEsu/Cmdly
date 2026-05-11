@@ -4,6 +4,15 @@ dist
 *.local
 .env
 .env.*
+!.env.example
+!**/.env.example
+
+# Secrets & local Firebase web config (never commit real keys)
+firebase-applet-config.json
+**/firebase-adminsdk*.json
+**/*serviceAccount*.json
+**/google-services.json
+**/GoogleService-Info.plist
 
 # Android
 android/.gradle/

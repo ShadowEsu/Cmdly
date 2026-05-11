@@ -4,6 +4,8 @@ const EnvSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().min(1).max(65535).default(8787),
   CORS_ORIGIN: z.string().default("*"),
+  /** Google AI Studio / Gemini API key — server only; never expose to the browser. */
+  GEMINI_API_KEY: z.string().min(1),
   /**
    * Optional: comma-separated API keys for simple auth.
    * Prefer a real auth system later; this is for “public endpoints” protection now.

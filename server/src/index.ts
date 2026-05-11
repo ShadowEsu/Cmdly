@@ -11,6 +11,8 @@ import { authFromApiKeys } from "./middleware/auth.js";
 import { buildRateLimiters } from "./middleware/rateLimit.js";
 import { z } from "zod";
 import { validate } from "./middleware/validate.js";
+import { requireFirebaseUser } from "./middleware/firebaseAuth.js";
+import { createRegradeGeminiRouter } from "./regradeGemini.js";
 
 const env = loadEnv();
 
@@ -36,18 +38,23 @@ app.use(
   })
 );
 
-app.use(express.json({ limit: "64kb", type: ["application/json", "application/*+json"] }));
-
-// Auth is optional (if API_KEYS not provided endpoints are still “public”).
-app.use(authFromApiKeys(env.API_KEYS));
-
-// Rate limiting: apply to all public endpoints (IP + principal/user bucket).
+// Rate limiting: IP + Firebase uid when present (applied before body parsers).
 const { ipLimiter, userLimiter } = buildRateLimiters(env);
 app.use(ipLimiter);
 app.use(userLimiter);
 
 // Health (public)
 app.get("/health", (_req, res) => res.json({ ok: true }));
+
+// Gemini proxy: large JSON — must run before the global 64kb parser.
+app.use(
+  "/v1/gemini",
+  express.json({ limit: "25mb", type: ["application/json", "application/*+json"] }),
+  requireFirebaseUser,
+  createRegradeGeminiRouter(env)
+);
+
+app.use(express.json({ limit: "64kb", type: ["application/json", "application/*+json"] }));
 
 // Example “public endpoint” with strict validation/sanitization.
 // (Keeps the API useful even before you wire the mobile app to it.)
@@ -62,7 +69,7 @@ const FeedbackSchema = z.object({
     .optional()
 });
 
-app.post("/v1/feedback", validate(FeedbackSchema, "body"), (req, res) => {
+app.post("/v1/feedback", authFromApiKeys(env.API_KEYS), validate(FeedbackSchema, "body"), (req, res) => {
   const body = req.body as z.infer<typeof FeedbackSchema>;
 
   // Secure API key handling:
@@ -101,6 +108,6 @@ app.use((err: unknown, req: express.Request, res: express.Response, _next: expre
 
 app.listen(env.PORT, () => {
   // eslint-disable-next-line no-console
-  console.log(`cmdly-server listening on :${env.PORT}`);
+  console.log(`regrade-api listening on :${env.PORT}`);
 });
 

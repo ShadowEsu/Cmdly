@@ -1,35 +1,69 @@
-import type { ReactNode } from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import { CollectionsProvider } from "./context/CollectionsContext";
-import { BottomNav } from "./components/BottomNav";
-import { HomePage } from "./pages/HomePage";
-import { PlatformPage } from "./pages/PlatformPage";
-import { SearchPage } from "./pages/SearchPage";
-import { CollectionsPage } from "./pages/CollectionsPage";
-
-function Shell({ children }: { children: ReactNode }) {
-  return (
-    <div className="mx-auto flex min-h-full max-w-lg flex-col text-[17.5px] leading-relaxed">
-      {children}
-      <BottomNav />
-    </div>
-  );
-}
+import React, { useState } from 'react';
+import Layout from './components/Layout';
+import Dashboard from './views/Dashboard';
+import UploadCenter from './views/UploadCenter';
+import EvidenceSummary from './views/EvidenceSummary';
+import VerdictReport from './views/VerdictReport';
+import Profile from './views/Profile';
+import History from './views/History';
+import Advocate from './views/Advocate';
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [flowStep, setFlowStep] = useState('none'); // none, summary, verdict
+  const [currentCaseId, setCurrentCaseId] = useState<string | null>(null);
+
+  const handleStartAppeal = () => {
+    setActiveTab('upload');
+  };
+
+  const handleSubmitUpload = (caseId?: string) => {
+    if (caseId) setCurrentCaseId(caseId);
+    setFlowStep('summary');
+  };
+
+  const handleFinalizeVerdict = () => {
+    setFlowStep('verdict');
+  };
+
+  const renderContent = () => {
+    if (activeTab === 'upload') {
+      if (flowStep === 'summary') {
+        return <EvidenceSummary caseId={currentCaseId} onFinalize={handleFinalizeVerdict} />;
+      }
+      if (flowStep === 'verdict') {
+        return <VerdictReport caseId={currentCaseId} />;
+      }
+      return <UploadCenter onSubmit={handleSubmitUpload} />;
+    }
+
+    if (activeTab === 'history') {
+      return <History />;
+    }
+
+    if (activeTab === 'profile') {
+      return <Profile />;
+    }
+
+    if (activeTab === 'chat') {
+      return <Advocate onBack={() => setActiveTab('dashboard')} />;
+    }
+
+    return (
+      <Dashboard onStartAppeal={handleStartAppeal} onOpenChat={() => setActiveTab('chat')} />
+    );
+  };
+
+
   return (
-    <BrowserRouter>
-      <CollectionsProvider>
-        <Shell>
-          <Routes>
-            <Route path="/" element={<HomePage />} />
-            <Route path="/platform/:id" element={<PlatformPage />} />
-            <Route path="/search" element={<SearchPage />} />
-            <Route path="/collections" element={<CollectionsPage />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </Shell>
-      </CollectionsProvider>
-    </BrowserRouter>
+    <Layout 
+      activeTab={activeTab} 
+      onTabChange={(tab) => {
+        setActiveTab(tab);
+        if (tab !== 'upload') setFlowStep('none');
+      }}
+    >
+      {renderContent()}
+    </Layout>
   );
 }
