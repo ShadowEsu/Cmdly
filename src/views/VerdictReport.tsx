@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { ICONS } from '../constants';
 import { caseService, Case } from '../services/caseService';
 
-export default function VerdictReport({ caseId }: { caseId: string | null }) {
+export default function VerdictReport({ caseId, onSubmit }: { caseId: string | null; onSubmit?: () => void }) {
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
 
   useEffect(() => {
@@ -291,13 +291,13 @@ export default function VerdictReport({ caseId }: { caseId: string | null }) {
       </section>
 
       {/* Institutional Timeline */}
-      <section className="pb-32 px-6">
+      <section className="pb-32 px-6 space-y-12">
          <div className="flex items-center gap-4 mb-20">
             <div className="w-2 h-2 rounded-full bg-primary" />
             <h4 className="text-[10px] font-bold uppercase tracking-[0.5em] text-primary/40">Case Resolution Roadmap</h4>
             <div className="h-px flex-1 bg-primary/5" />
          </div>
-         
+
          <div className="relative border-l border-primary/10 ml-8 pl-16 space-y-24 max-w-3xl">
             {[
               { status: 'DONE', color: 'bg-primary', title: 'Analysis Complete', desc: 'Regrade has reviewed your grade, rubric, and feedback for inconsistencies.' },
@@ -314,6 +314,16 @@ export default function VerdictReport({ caseId }: { caseId: string | null }) {
               </div>
             ))}
          </div>
+
+         {onSubmit && (
+           <button
+             onClick={onSubmit}
+             className="mt-16 bg-primary text-white px-10 sm:px-16 py-6 sm:py-8 rounded-[2.5rem] font-light uppercase tracking-[0.32em] text-[11px] sm:text-xs hover:shadow-[0_20px_50px_rgba(0,35,111,0.3)] hover:-translate-y-1 transition-all flex items-center gap-6 group w-full sm:w-auto justify-center"
+           >
+             Continue to Submission Guide
+             <ICONS.ArrowRight className="w-5 h-5 group-hover:translate-x-3 transition-transform" />
+           </button>
+         )}
       </section>
     </div>
   );
