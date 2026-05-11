@@ -309,13 +309,13 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 md:gap-10 lg:gap-12 relative max-w-7xl mx-auto">
-      <div className="lg:col-span-8 space-y-6 sm:space-y-8">
-        <section className="space-y-2 sm:space-y-3">
-          <h1 className="font-serif text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-primary font-light tracking-tight text-center md:text-left break-words">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 relative max-w-7xl mx-auto">
+      <div className="lg:col-span-8 space-y-8">
+        <section className="space-y-3">
+          <h1 className="font-serif text-4xl md:text-5xl lg:text-6xl text-primary font-light tracking-tight text-center md:text-left">
             Upload your graded worksheet
           </h1>
-          <p className="text-sm sm:text-base md:text-lg text-on-surface-variant/85 font-serif leading-relaxed max-w-2xl text-center md:text-left">
+          <p className="text-base md:text-lg text-on-surface-variant/85 font-serif leading-relaxed max-w-2xl text-center md:text-left">
             One <strong className="font-medium text-primary">PDF or photo</strong> is enough — the AI reads scores, rubric, and comments from it.
             Add a line or two below only if something important isn&apos;t visible on the file.
           </p>
@@ -324,24 +324,24 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
         <motion.div
           initial={{ opacity: 0, scale: 0.99 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="glass-panel rounded-xl sm:rounded-2xl md:rounded-[2rem] p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6 border border-primary/10 bg-white"
+          className="glass-panel rounded-2xl md:rounded-[2rem] p-6 md:p-8 space-y-6 border border-primary/10 bg-white"
         >
-          <div className="flex flex-col xs:flex-row xs:items-center xs:justify-between gap-3 sm:gap-4 border-b border-primary/5 pb-3 sm:pb-5">
-            <div className="min-w-0">
-              <h2 className="font-serif text-lg sm:text-xl md:text-2xl text-primary font-medium tracking-tight break-words">File</h2>
-              <p className="text-[10px] sm:text-[11px] text-primary/50 mt-0.5">Gradescope, Canvas, or paper — tap or drag here</p>
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-primary/5 pb-5">
+            <div>
+              <h2 className="font-serif text-xl md:text-2xl text-primary font-medium tracking-tight">File</h2>
+              <p className="text-[11px] text-primary/50 mt-0.5">Gradescope, Canvas, or paper — tap or drag here</p>
             </div>
             <button
               type="button"
               onClick={() => setShowAdvocate(true)}
-              className="self-start xs:self-auto text-[10px] sm:text-[11px] font-bold uppercase tracking-widest text-primary/45 hover:text-primary border border-primary/10 rounded-lg sm:rounded-xl px-3 sm:px-4 py-2 sm:py-2.5 transition-colors min-h-10 flex items-center justify-center flex-shrink-0"
+              className="self-start sm:self-auto min-h-[44px] flex items-center text-[11px] font-bold uppercase tracking-widest text-primary/45 hover:text-primary border border-primary/10 rounded-xl px-4 py-2.5 transition-colors"
             >
               Questions? Chat
             </button>
           </div>
 
           <div
-            className={`rounded-lg sm:rounded-xl border border-primary/15 transition-colors ${
+            className={`rounded-xl border border-primary/15 transition-colors ${
               gradescopeHelpOpen ? 'bg-primary/[0.05]' : 'bg-primary/[0.03]'
             }`}
           >
@@ -349,14 +349,14 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
               type="button"
               aria-expanded={gradescopeHelpOpen}
               onClick={() => setGradescopeHelpOpen((o) => !o)}
-              className="flex w-full cursor-pointer list-none items-center justify-between gap-3 px-3 sm:px-4 py-3 sm:py-3.5 text-left text-xs sm:text-sm font-semibold text-primary active:scale-[0.98] transition-transform min-h-11"
+              className="flex w-full cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-left text-sm font-semibold text-primary"
             >
               <span className="flex items-center gap-2 min-w-0">
-                <ICONS.BookOpen className="text-secondary flex-shrink-0" size={16} strokeWidth={1.75} className="sm:w-[18px] sm:h-[18px]" />
+                <ICONS.BookOpen className="text-secondary shrink-0" size={18} strokeWidth={1.75} />
                 <span className="leading-snug">Using Gradescope? Get the graded PDF first</span>
               </span>
               <ICONS.ChevronDown
-                className={`flex-shrink-0 w-4 h-4 text-primary/45 transition-transform ${
+                className={`shrink-0 w-4 h-4 text-primary/45 transition-transform ${
                   gradescopeHelpOpen ? 'rotate-180' : ''
                 }`}
                 strokeWidth={2}
@@ -527,7 +527,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
             onDragLeave={onDragLeave}
             onDrop={onDrop}
             onClick={() => document.getElementById('file-upload-1')?.click()}
-            className={`border-2 border-dashed rounded-lg sm:rounded-2xl p-6 sm:p-8 md:p-10 lg:p-12 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer active:scale-[0.98] min-h-40 sm:min-h-52 ${
+            className={`border-2 border-dashed rounded-2xl p-10 md:p-12 flex flex-col items-center justify-center text-center gap-3 transition-all cursor-pointer ${
               isDragging ? 'border-primary bg-primary/10' : 'border-primary/15 bg-primary/[0.04] hover:bg-primary/[0.07]'
             }`}
           >
@@ -542,11 +542,11 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
                 e.target.value = '';
               }}
             />
-            <div className="bg-white p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-md shadow-primary/10">
-              <ICONS.Upload className="text-primary w-6 h-6 sm:w-7 sm:h-7" />
+            <div className="bg-white p-3 rounded-xl shadow-md shadow-primary/10">
+              <ICONS.Upload className="text-primary w-7 h-7" />
             </div>
-            <p className="font-serif text-base sm:text-lg text-primary font-medium">Drop or choose PDF / photo</p>
-            <p className="text-[10px] sm:text-[11px] text-primary/45 max-w-sm px-1">Screenshots work. No account for the file — we analyze what you upload.</p>
+            <p className="font-serif text-lg text-primary font-medium">Drop or choose PDF / photo</p>
+            <p className="text-[11px] text-primary/45 max-w-sm">Screenshots work. No account for the file — we analyze what you upload.</p>
           </div>
 
           {stagedUploads.length > 0 && (
@@ -580,7 +580,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
                     <button
                       type="button"
                       onClick={() => removeFile(u.id)}
-                      className="text-[10px] font-bold uppercase text-red-600 hover:underline shrink-0"
+                      className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[10px] font-bold uppercase text-red-600 hover:underline shrink-0 px-2"
                     >
                       Remove
                     </button>
@@ -595,16 +595,16 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
             </div>
           )}
 
-          <div className="space-y-2 pt-3 sm:pt-4 border-t border-primary/5">
-            <label className="text-[10px] sm:text-xs font-semibold text-primary/55 block">
+          <div className="space-y-2 pt-2 border-t border-primary/5">
+            <label className="text-xs font-semibold text-primary/55">
               Optional — only if the worksheet doesn&apos;t show everything
             </label>
             <textarea
               value={extraNotes}
               onChange={(e) => setExtraNotes(e.target.value)}
               maxLength={8000}
-              rows={4}
-              className="w-full bg-white border border-primary/10 rounded-lg sm:rounded-xl px-3 sm:px-4 py-3 sm:py-4 text-sm outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 focus:ring-offset-surface focus:border-primary/20 resize-y text-primary/85 placeholder:text-primary/30 min-h-24"
+              rows={3}
+              className="w-full bg-white border border-primary/10 rounded-xl px-4 py-3 text-sm outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/20 resize-y text-primary/85 placeholder:text-primary/30"
               placeholder="e.g. course name, which question you’re appealing, or text that’s cut off in the photo…"
             />
           </div>
@@ -614,38 +614,37 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           <motion.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
-            className="p-4 sm:p-6 bg-red-500/10 border border-red-500/20 rounded-lg sm:rounded-2xl flex gap-3 sm:gap-4 text-red-700"
+            className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl flex gap-4 text-red-700"
           >
-            <ICONS.ShieldAlert size={20} className="flex-shrink-0 sm:w-6 sm:h-6 mt-0.5" />
-            <div className="min-w-0">
-              <p className="text-xs sm:text-sm font-bold uppercase tracking-widest mb-1">Please review your input</p>
-              <p className="text-xs sm:text-xs font-serif italic leading-relaxed break-words">{securityError}</p>
+            <ICONS.ShieldAlert size={24} className="flex-shrink-0" />
+            <div>
+              <p className="text-sm font-bold uppercase tracking-widest mb-1">Please review your input</p>
+              <p className="text-xs font-serif italic">{securityError}</p>
             </div>
           </motion.div>
         )}
 
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-4 sm:pt-6 border-t border-primary/5">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 border-t border-primary/5">
           <div className="flex items-center gap-2 text-primary/35">
-            <ICONS.Shield className="flex-shrink-0" size={18} />
+            <ICONS.Shield className="shrink-0" size={20} />
             <p className="text-[10px] font-bold uppercase tracking-widest">Private & encrypted</p>
           </div>
           <button
             type="button"
             onClick={handleSubmit}
             disabled={loading}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 sm:gap-3 bg-primary text-white px-4 sm:px-8 md:px-10 py-3 sm:py-4 md:py-5 rounded-lg sm:rounded-2xl font-bold uppercase tracking-[0.2em] text-[10px] sm:text-[11px] hover:bg-primary/90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed min-h-12 sm:min-h-14"
+            className="w-full sm:w-auto flex items-center justify-center gap-3 bg-primary text-white px-10 py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] hover:shadow-xl hover:shadow-primary/20 transition-all disabled:opacity-50"
           >
-            {loading && <ICONS.AILogo className="animate-spin" size={16} />}
             {loading ? 'Analyzing…' : 'Analyze worksheet'}
-            {!loading && <ICONS.ArrowRight className="opacity-70" size={16} className="sm:w-[18px] sm:h-[18px]" />}
+            {!loading && <ICONS.ArrowRight className="opacity-70" size={18} />}
           </button>
         </div>
       </div>
 
       {/* Right Sidebar: Status */}
-      <div className="lg:col-span-4 space-y-4 sm:space-y-6">
-        <div className="glass-panel rounded-xl sm:rounded-2xl p-4 sm:p-6 md:p-8 space-y-6 sm:space-y-8 sticky top-20 sm:top-24">
-          <h3 className="font-serif text-lg sm:text-2xl text-primary">Your Checklist</h3>
+      <div className="lg:col-span-4 space-y-6">
+        <div className="glass-panel rounded-2xl p-8 space-y-8 sticky top-24">
+          <h3 className="font-serif text-2xl text-primary">Your Checklist</h3>
 
           {(() => {
             const hasPdfText = stagedUploads.some((s) => (s.pdfText?.length ?? 0) > 0);
@@ -685,17 +684,17 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
 
             return (
               <>
-                <div className="space-y-4 sm:space-y-6 md:space-y-8 relative">
-                  <div className="absolute left-[11px] sm:left-[15px] top-4 bottom-4 w-[1px] bg-primary/10" />
+                <div className="space-y-8 relative">
+                  <div className="absolute left-[15px] top-4 bottom-4 w-[1px] bg-primary/10" />
                   {steps.map((s, i) => (
                     <div
                       key={i}
-                      className={`flex gap-4 sm:gap-6 relative transition-opacity ${
+                      className={`flex gap-6 relative transition-opacity ${
                         s.state === 'needed' && i > 0 && steps[i - 1].state === 'needed' ? 'opacity-30' : ''
                       }`}
                     >
                       <div
-                        className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center z-10 flex-shrink-0 transition-colors ${
+                        className={`w-8 h-8 rounded-full flex items-center justify-center z-10 shrink-0 transition-colors ${
                           s.state === 'done'
                             ? 'bg-secondary'
                             : s.state === 'optional'
@@ -704,16 +703,16 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
                         }`}
                       >
                         {s.state === 'done' ? (
-                          <ICONS.Check className="text-white w-3 h-3 sm:w-4 sm:h-4" />
+                          <ICONS.Check className="text-white w-4 h-4" />
                         ) : s.state === 'optional' ? (
-                          <ICONS.Zap className="text-amber-700 w-3 h-3 sm:w-4 sm:h-4" strokeWidth={2} />
+                          <ICONS.Zap className="text-amber-700 w-4 h-4" strokeWidth={2} />
                         ) : (
-                          <div className="w-1.5 h-1.5 rounded-full bg-on-surface-variant" />
+                          <div className="w-2 h-2 rounded-full bg-on-surface-variant" />
                         )}
                       </div>
                       <div className="min-w-0">
                         <p
-                          className={`text-[9px] sm:text-[10px] font-bold uppercase tracking-widest mb-0.5 ${
+                          className={`text-[10px] font-bold uppercase tracking-widest mb-0.5 ${
                             s.state === 'done'
                               ? 'text-secondary'
                               : s.state === 'optional'
@@ -723,19 +722,19 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
                         >
                           {s.state === 'done' ? 'Done' : s.state === 'optional' ? 'Optional' : 'Needed'}
                         </p>
-                        <p className="text-xs sm:text-sm font-bold text-primary break-words">{s.label}</p>
+                        <p className="text-sm font-bold text-primary">{s.label}</p>
                         {s.hint ? (
-                          <p className="text-[10px] sm:text-[11px] text-on-surface-variant opacity-75 leading-snug mt-0.5">{s.hint}</p>
+                          <p className="text-[11px] text-on-surface-variant opacity-75 leading-snug mt-0.5">{s.hint}</p>
                         ) : null}
                       </div>
                     </div>
                   ))}
                 </div>
 
-                <div className="pt-4 sm:pt-6 md:pt-8 border-t border-primary/5">
-                  <div className="flex justify-between items-end mb-2 sm:mb-3">
-                    <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Ready</span>
-                    <span className="text-base sm:text-lg font-serif font-bold text-primary">{pct}%</span>
+                <div className="pt-8 border-t border-primary/5">
+                  <div className="flex justify-between items-end mb-2">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">Ready</span>
+                    <span className="text-lg font-serif font-bold text-primary">{pct}%</span>
                   </div>
                   <div className="w-full h-1 bg-primary/5 rounded-full overflow-hidden">
                     <motion.div
@@ -756,10 +755,10 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           </div>
         </div>
 
-        <motion.div 
+        <motion.div
           whileHover={{ scale: 1.02 }}
           onClick={() => setShowAdvocate(true)}
-          className="glass-panel rounded-2xl overflow-hidden aspect-[4/3] relative group cursor-pointer"
+          className="hidden lg:block glass-panel rounded-2xl overflow-hidden aspect-[4/3] relative group cursor-pointer"
         >
           <img 
             src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800" 

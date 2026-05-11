@@ -5,14 +5,27 @@ import { caseService, Case } from '../services/caseService';
 
 export default function VerdictReport({ caseId, onSubmit }: { caseId: string | null; onSubmit?: () => void }) {
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (caseId) {
+      setLoading(true);
       caseService.getCaseById(caseId).then(data => {
         if (data) setCurrentCase(data);
-      });
+      }).finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, [caseId]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4 text-primary/40">
+        <ICONS.AILogo className="animate-spin" size={32} />
+        <p className="text-xs font-bold uppercase tracking-widest">Building your verdict…</p>
+      </div>
+    );
+  }
 
   const analysis = currentCase?.analysis;
 
@@ -33,67 +46,68 @@ export default function VerdictReport({ caseId, onSubmit }: { caseId: string | n
       : null;
 
   return (
-    <div className="space-y-12 sm:space-y-16 md:space-y-24 max-w-7xl mx-auto px-3 sm:px-4 lg:px-6">
+    <div className="space-y-10 md:space-y-16 max-w-7xl mx-auto">
       {/* Hero Verdict */}
-      <section className="space-y-8 sm:space-y-12 md:space-y-16 py-6 sm:py-8 md:py-12">
-        <div className="flex items-center gap-3 sm:gap-6">
-          <div className="h-px bg-primary/20 w-8 sm:w-16 md:w-32" />
-          <span className="text-[10px] sm:text-[13px] md:text-sm font-light tracking-[0.45em] text-primary opacity-50 uppercase whitespace-nowrap">
+      <section className="space-y-8 md:space-y-12 py-4 md:py-8">
+        <div className="flex items-center gap-6">
+          <div className="h-px bg-primary/20 w-32" />
+          <span className="text-[13px] sm:text-sm font-light tracking-[0.45em] text-primary opacity-50 uppercase">
             Case ID: {currentCase?.ref || '—'}
           </span>
         </div>
-
-        <h1 className="font-serif text-3xl sm:text-5xl md:text-7xl lg:text-8xl xl:text-9xl text-primary font-light leading-tight sm:leading-none tracking-tight -ml-1 sm:-ml-2 break-words">
+        
+        <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl text-primary font-light leading-none tracking-tight -ml-1 md:-ml-2">
           Audit <span className="font-light italic text-primary/60 block lg:inline">Verdict</span>
         </h1>
 
-        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 sm:gap-8 md:gap-12 border-t border-primary/10 pt-6 sm:pt-8 md:pt-12">
-          <div className="space-y-3 sm:space-y-4 md:space-y-6 max-w-4xl">
-            <h2 className="font-serif text-2xl sm:text-3xl md:text-4xl lg:text-6xl text-primary font-light uppercase tracking-tight leading-tight sm:leading-none break-words">
+        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-6 md:gap-10 border-t border-primary/10 pt-6 md:pt-10">
+          <div className="space-y-4 max-w-4xl">
+            <h2 className="font-serif text-3xl md:text-5xl text-primary font-light uppercase tracking-tight leading-none">
               {analysis?.case_analysis.overall_case_strength === 'strong' ? 'Strong Grounds for Appeal' :
                analysis?.case_analysis.overall_case_strength === 'moderate' ? 'Some Grounds for Appeal' :
                analysis?.case_analysis.overall_case_strength === 'weak' ? 'Limited Grounds for Appeal' : 'Analyzing Your Case'}
             </h2>
-            <p className="text-sm sm:text-lg md:text-2xl lg:text-3xl text-primary/70 font-serif italic leading-relaxed font-medium">
+            <p className="text-lg md:text-2xl text-primary/70 font-serif italic leading-relaxed font-medium">
               {analysis?.case_analysis.case_strength_reason || "Review the findings below to understand your options."}
             </p>
           </div>
-
-          <div className="flex flex-col items-center xl:items-end gap-2 bg-primary/[0.03] p-4 sm:p-6 md:p-8 lg:p-10 rounded-lg sm:rounded-2xl lg:rounded-[3rem] border border-primary/10 max-w-full flex-shrink-0">
-            <div className="text-[10px] sm:text-[11px] font-light uppercase tracking-[0.32em] text-primary/50 mb-1 text-center xl:text-right">
+          
+          <div className="flex flex-col items-center xl:items-end gap-2 bg-primary/[0.03] p-6 sm:p-8 rounded-2xl sm:rounded-[2.5rem] border border-primary/10 max-w-full w-full xl:w-auto">
+            <div className="text-[11px] font-light uppercase tracking-[0.32em] text-primary/50 mb-1 text-center xl:text-right">
               Possible point issues flagged
             </div>
             {analysis && recoverablePts > 0 ? (
-              <div className="flex items-baseline gap-2 sm:gap-3">
-                <span className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-serif font-light text-primary tracking-tight leading-none">
+              <div className="flex items-baseline gap-3">
+                <span className="text-6xl sm:text-7xl md:text-8xl font-serif font-light text-primary tracking-tight leading-none">
                   +{recoverablePts}
                 </span>
-                <span className="text-base sm:text-lg md:text-xl font-serif font-light text-primary/50 italic">pts</span>
+                <span className="text-xl font-serif font-light text-primary/50 italic">pts</span>
               </div>
             ) : analysis ? (
-              <p className="font-serif text-xs sm:text-sm md:text-lg lg:text-xl font-light text-primary/65 text-center xl:text-right max-w-sm leading-snug">
-                No extra points were automatically estimated from the text you supplied. That does not mean an appeal is impossible—only that the model did not find a clear arithmetic or rubric mismatch.
+              <p className="font-serif text-lg sm:text-xl font-light text-primary/65 text-center xl:text-right max-w-sm leading-snug">
+                No extra points were automatically estimated from the text you supplied. That does not mean an appeal is
+                impossible—only that the model did not find a clear arithmetic or rubric mismatch.
               </p>
             ) : (
-              <p className="font-serif text-xs sm:text-base font-light text-primary/50">Loading analysis…</p>
+              <p className="font-serif text-base font-light text-primary/50">Loading analysis…</p>
             )}
-            <p className="text-[9px] sm:text-[10px] font-light uppercase tracking-[0.28em] text-primary/40 mt-2 sm:mt-3 text-center xl:text-right leading-relaxed">
+            <p className="text-[10px] font-light uppercase tracking-[0.28em] text-primary/40 mt-3 text-center xl:text-right leading-relaxed">
               Not a grade guarantee — educational review only
             </p>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row sm:flex-wrap gap-3 sm:gap-4 md:gap-6 pt-6 sm:pt-8 md:pt-12">
+        <div className="flex flex-wrap gap-4 pt-6 md:pt-8">
           <button
             type="button"
-            className="bg-primary text-white px-4 sm:px-10 md:px-12 lg:px-16 py-3 sm:py-5 md:py-6 lg:py-8 rounded-lg sm:rounded-2xl md:rounded-[2.5rem] font-light uppercase tracking-[0.32em] text-[10px] sm:text-[11px] md:text-xs hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 sm:gap-4 md:gap-6 group min-h-11 sm:min-h-12 md:min-h-14"
+            className="bg-primary text-white px-8 sm:px-12 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] font-light uppercase tracking-[0.28em] text-[11px] sm:text-xs hover:shadow-[0_20px_50px_rgba(0,35,111,0.3)] hover:-translate-y-1 transition-all flex items-center gap-4 group w-full sm:w-auto justify-center min-h-[48px]"
           >
             Write appeal letter
-            <ICONS.ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 group-hover:translate-x-1 transition-transform flex-shrink-0" />
+            <ICONS.ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
           </button>
           <button
             type="button"
-            className="bg-white border-2 border-primary/10 text-primary px-4 sm:px-10 md:px-12 lg:px-16 py-3 sm:py-5 md:py-6 lg:py-8 rounded-lg sm:rounded-2xl md:rounded-[2.5rem] font-light uppercase tracking-[0.32em] text-[10px] sm:text-[11px] md:text-xs hover:bg-primary/5 active:scale-[0.98] transition-all min-h-11 sm:min-h-12 md:min-h-14 flex-grow sm:flex-grow-0"
+            className="bg-white border-2 border-primary/10 text-primary px-8 sm:px-12 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] font-light uppercase tracking-[0.28em] text-[11px] sm:text-xs hover:bg-primary/5 transition-all w-full sm:w-auto min-h-[48px]"
           >
             Download evidence
           </button>
@@ -101,17 +115,17 @@ export default function VerdictReport({ caseId, onSubmit }: { caseId: string | n
       </section>
 
       {/* Discovery Dashboard */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">
         {/* Probability Meter (Bento) */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, scale: 0.98 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
-          className="lg:col-span-12 glass-panel rounded-[5rem] p-24 flex flex-col items-center text-center relative overflow-hidden bg-white border-2 border-primary/10 shadow-huge"
+          className="lg:col-span-12 glass-panel rounded-3xl sm:rounded-[4rem] p-8 sm:p-12 md:p-16 flex flex-col items-center text-center relative overflow-hidden bg-white border-2 border-primary/10 shadow-huge"
         >
           <div className="absolute inset-0 paper-texture opacity-10 pointer-events-none" />
-          
-          <div className="space-y-4 mb-20">
+
+          <div className="space-y-4 mb-8 sm:mb-12">
             <h3 className="text-[13px] font-light uppercase tracking-[0.55em] text-primary opacity-60">Analysis signal</h3>
             <div className="h-px w-32 bg-primary/20 mx-auto" />
           </div>
@@ -135,7 +149,7 @@ export default function VerdictReport({ caseId, onSubmit }: { caseId: string | n
              </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-16 w-full mt-24 pt-16 border-t border-primary/5">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10 w-full mt-8 md:mt-16 pt-6 md:pt-10 border-t border-primary/5">
              <div className="space-y-4">
                 <p className="text-[11px] font-light uppercase tracking-[0.32em] text-primary/45">Rubric alignment (model)</p>
                 <p className="text-4xl sm:text-5xl font-serif font-light text-primary tracking-tight">
@@ -266,7 +280,7 @@ export default function VerdictReport({ caseId, onSubmit }: { caseId: string | n
             )}
           </div>
           
-          <div className="lg:col-span-7 grid grid-cols-2 gap-12 sm:gap-20">
+          <div className="lg:col-span-7 grid grid-cols-2 gap-6 sm:gap-10">
              {[
                { label: 'Philosophy', val: analysis?.teacher_profile.marking_philosophy || 'Standards', sub: 'Primary Driver' },
                { label: 'Feedback Quality', val: analysis?.teacher_profile.feedback_quality || 'Adequate', sub: 'Tone Analysis' },
@@ -291,25 +305,25 @@ export default function VerdictReport({ caseId, onSubmit }: { caseId: string | n
       </section>
 
       {/* Institutional Timeline */}
-      <section className="pb-32 px-6 space-y-12">
-         <div className="flex items-center gap-4 mb-20">
+      <section className="pb-16 md:pb-32 px-2 sm:px-6 space-y-12">
+         <div className="flex items-center gap-4 mb-8 md:mb-12">
             <div className="w-2 h-2 rounded-full bg-primary" />
             <h4 className="text-[10px] font-bold uppercase tracking-[0.5em] text-primary/40">Case Resolution Roadmap</h4>
             <div className="h-px flex-1 bg-primary/5" />
          </div>
 
-         <div className="relative border-l border-primary/10 ml-8 pl-16 space-y-24 max-w-3xl">
+         <div className="relative border-l border-primary/10 ml-4 sm:ml-8 pl-8 sm:pl-14 space-y-10 md:space-y-16 max-w-3xl">
             {[
               { status: 'DONE', color: 'bg-primary', title: 'Analysis Complete', desc: 'Regrade has reviewed your grade, rubric, and feedback for inconsistencies.' },
               { status: 'NEXT', color: 'bg-primary animate-pulse', title: 'Write Your Appeal', desc: 'Use the findings above to draft a clear, professional appeal letter.' },
               { status: 'PENDING', color: 'bg-primary/5', title: 'Submit to Professor', desc: 'Send your appeal to your professor or the department\'s review committee.' },
             ].map((s, idx) => (
               <div key={idx} className="relative group">
-                <div className={`absolute -left-[76px] top-1.5 w-5 h-5 rounded-lg border-2 border-surface shadow-sm ${s.color}`} />
+                <div className={`absolute -left-[42px] sm:-left-[60px] top-1.5 w-4 h-4 sm:w-5 sm:h-5 rounded-md sm:rounded-lg border-2 border-surface shadow-sm ${s.color}`} />
                 <p className="text-[10px] font-bold tracking-[0.3em] uppercase mb-4 text-primary opacity-40">{s.status}</p>
                 <div className="space-y-3">
-                  <p className="font-serif text-4xl text-primary font-light">{s.title}</p>
-                  <p className="text-lg text-on-surface-variant font-serif italic opacity-60 leading-relaxed">{s.desc}</p>
+                  <p className="font-serif text-2xl sm:text-3xl text-primary font-light">{s.title}</p>
+                  <p className="text-base text-on-surface-variant font-serif italic opacity-60 leading-relaxed">{s.desc}</p>
                 </div>
               </div>
             ))}
