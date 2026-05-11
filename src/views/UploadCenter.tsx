@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ICONS } from '../constants';
 import Advocate from './Advocate';
+import PlatformSelector from '../components/PlatformSelector';
 import { caseService } from '../services/caseService';
 import { scanContentForThreats } from '../lib/securityScanner';
 
@@ -18,17 +19,6 @@ type StagedUpload = {
 };
 
 const MAX_IMAGES_FOR_API = 6;
-
-/**
- * Example Gradescope UI screenshots (user-provided). Static files live in
- * `public/gradescope/examples/` — URLs are served from the site root.
- */
-const GRADESCOPE_EXAMPLE_PATHS = {
-  downloadOriginalVsGraded: '/gradescope/examples/01-download-original-vs-graded.png',
-  downloadGradedCopyButton: '/gradescope/examples/02-download-graded-copy-button.png',
-  assignmentViewToolbar: '/gradescope/examples/03-assignment-view-with-toolbar.png',
-  scoreSummary: '/gradescope/examples/04-score-summary-example.png',
-} as const;
 
 async function fileToBase64Inline(file: File): Promise<{ mimeType: string; data: string }> {
   const buf = await file.arrayBuffer();
@@ -55,9 +45,6 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
   const [stagedUploads, setStagedUploads] = useState<StagedUpload[]>([]);
   const [isDragging, setIsDragging] = useState(false);
   const previewUrlsRef = useRef<Set<string>>(new Set());
-
-  const [gradescopeHelpOpen, setGradescopeHelpOpen] = useState(false);
-  const [otherSystemsHelpOpen, setOtherSystemsHelpOpen] = useState(false);
 
   useEffect(() => {
     return () => {
@@ -328,8 +315,8 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
         >
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-primary/5 pb-5">
             <div>
-              <h2 className="font-serif text-xl md:text-2xl text-primary font-medium tracking-tight">File</h2>
-              <p className="text-[11px] text-primary/50 mt-0.5">Gradescope, Canvas, or paper — tap or drag here</p>
+              <h2 className="font-serif text-xl md:text-2xl text-primary font-medium tracking-tight">Get your graded copy</h2>
+              <p className="text-[11px] text-primary/50 mt-0.5">Select your platform for step-by-step instructions</p>
             </div>
             <button
               type="button"
@@ -340,187 +327,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
             </button>
           </div>
 
-          <div
-            className={`rounded-xl border border-primary/15 transition-colors ${
-              gradescopeHelpOpen ? 'bg-primary/[0.05]' : 'bg-primary/[0.03]'
-            }`}
-          >
-            <button
-              type="button"
-              aria-expanded={gradescopeHelpOpen}
-              onClick={() => setGradescopeHelpOpen((o) => !o)}
-              className="flex w-full cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-left text-sm font-semibold text-primary"
-            >
-              <span className="flex items-center gap-2 min-w-0">
-                <ICONS.BookOpen className="text-secondary shrink-0" size={18} strokeWidth={1.75} />
-                <span className="leading-snug">Using Gradescope? Get the graded PDF first</span>
-              </span>
-              <ICONS.ChevronDown
-                className={`shrink-0 w-4 h-4 text-primary/45 transition-transform ${
-                  gradescopeHelpOpen ? 'rotate-180' : ''
-                }`}
-                strokeWidth={2}
-              />
-            </button>
-            {gradescopeHelpOpen ? (
-            <div className="space-y-4 border-t border-primary/10 px-4 pb-4 pt-3">
-              <p className="text-[12px] text-primary/60 font-serif leading-relaxed">
-                Examples below are <strong className="font-medium text-primary/80">real Gradescope screenshots</strong> (reference only — your
-                course may look slightly different). Files load from{' '}
-                <code className="rounded bg-primary/5 px-1 py-0.5 text-[11px] font-mono text-primary/70">/gradescope/examples/</code>.
-              </p>
-              <ol className="list-decimal space-y-2 pl-4 text-[13px] leading-relaxed text-primary/80 font-serif marker:font-sans marker:text-primary/50">
-                <li>Open your graded submission in Gradescope (the page with your score and questions).</li>
-                <li>
-                  Scroll to the bottom and click{' '}
-                  <strong className="font-semibold text-primary">Download Graded Copy</strong> —{' '}
-                  <span className="text-primary/65">not</span> &quot;Download Original&quot;. The graded PDF includes marks, rubric, and feedback.
-                </li>
-                <li>Save the file, then drag it into the upload box below (or tap to choose it).</li>
-              </ol>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <figure className="overflow-hidden rounded-lg border border-primary/10 bg-white shadow-sm">
-                  <img
-                    src={GRADESCOPE_EXAMPLE_PATHS.downloadOriginalVsGraded}
-                    alt="Example: Gradescope toolbar showing Download Original and Download Graded Copy"
-                    className="w-full object-contain object-top"
-                    loading="lazy"
-                  />
-                  <figcaption className="border-t border-primary/5 px-2 py-1.5 text-[10px] text-primary/55 leading-snug">
-                    Choose <strong className="text-primary">Download Graded Copy</strong> (right), not Original.
-                  </figcaption>
-                </figure>
-                <figure className="overflow-hidden rounded-lg border border-primary/10 bg-white shadow-sm">
-                  <img
-                    src={GRADESCOPE_EXAMPLE_PATHS.downloadGradedCopyButton}
-                    alt="Example: Download Graded Copy button close-up"
-                    className="w-full object-contain object-top max-h-32 sm:max-h-none"
-                    loading="lazy"
-                  />
-                  <figcaption className="border-t border-primary/5 px-2 py-1.5 text-[10px] text-primary/55">
-                    This is the file Regrade reads best.
-                  </figcaption>
-                </figure>
-                <figure className="overflow-hidden rounded-lg border border-primary/10 bg-white shadow-sm sm:col-span-2">
-                  <img
-                    src={GRADESCOPE_EXAMPLE_PATHS.assignmentViewToolbar}
-                    alt="Example: Gradescope graded assignment view with download buttons at the bottom"
-                    className="w-full object-contain object-top max-h-48 sm:max-h-64"
-                    loading="lazy"
-                  />
-                  <figcaption className="border-t border-primary/5 px-2 py-1.5 text-[10px] text-primary/55">
-                    Buttons are usually at the bottom of the graded submission view.
-                  </figcaption>
-                </figure>
-                <figure className="overflow-hidden rounded-lg border border-primary/10 bg-white shadow-sm sm:col-span-2">
-                  <img
-                    src={GRADESCOPE_EXAMPLE_PATHS.scoreSummary}
-                    alt="Example: Gradescope score summary with total points and per-question scores"
-                    className="w-full object-contain object-top max-h-56"
-                    loading="lazy"
-                  />
-                  <figcaption className="border-t border-primary/5 px-2 py-1.5 text-[10px] text-primary/55">
-                    The graded PDF usually includes this kind of breakdown — the AI uses it automatically.
-                  </figcaption>
-                </figure>
-              </div>
-            </div>
-            ) : null}
-          </div>
-
-          <div
-            className={`rounded-xl border border-primary/15 transition-colors ${
-              otherSystemsHelpOpen ? 'bg-primary/[0.05]' : 'bg-primary/[0.03]'
-            }`}
-          >
-            <button
-              type="button"
-              aria-expanded={otherSystemsHelpOpen}
-              onClick={() => setOtherSystemsHelpOpen((o) => !o)}
-              className="flex w-full cursor-pointer list-none items-center justify-between gap-3 px-4 py-3.5 text-left text-sm font-semibold text-primary"
-            >
-              <span className="flex items-center gap-2 min-w-0">
-                <ICONS.Library className="text-secondary shrink-0" size={18} strokeWidth={1.75} />
-                <span className="leading-snug">Canvas, Moodle, Turnitin, or another system? Get your graded copy</span>
-              </span>
-              <ICONS.ChevronDown
-                className={`shrink-0 w-4 h-4 text-primary/45 transition-transform ${
-                  otherSystemsHelpOpen ? 'rotate-180' : ''
-                }`}
-                strokeWidth={2}
-              />
-            </button>
-            {otherSystemsHelpOpen ? (
-            <div className="space-y-4 border-t border-primary/10 px-4 pb-4 pt-3">
-              <p className="text-[12px] text-primary/60 font-serif leading-relaxed">
-                Regrade works with <strong className="font-medium text-primary/80">any graded PDF or clear photos</strong> — not only
-                Gradescope. Your goal is the file or view that shows <strong className="font-medium text-primary/80">scores, rubric, and
-                instructor comments</strong> together. If you only have a link, open it in a browser, then use{' '}
-                <strong className="font-medium text-primary/80">Save as PDF</strong> or <strong className="font-medium text-primary/80">Print → PDF</strong>{' '}
-                on the page that shows the marks.
-              </p>
-              <div className="space-y-3 text-[12px] leading-relaxed text-primary/80 font-serif">
-                <div className="rounded-lg border border-primary/10 bg-white/80 px-3 py-2.5">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary/45 mb-1">Canvas</p>
-                  <p>
-                    <strong className="font-semibold text-primary">Grades</strong> → your course → the assignment. Open your submission
-                    and SpeedGrader feedback. Download the marked file if you see a download; otherwise print the feedback page to PDF so
-                    rubric and comments stay visible.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-primary/10 bg-white/80 px-3 py-2.5">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary/45 mb-1">Moodle</p>
-                  <p>
-                    Open the <strong className="font-semibold text-primary">assignment</strong> → your submission →{' '}
-                    <strong className="font-semibold text-primary">Feedback</strong> (files or comments your instructor returned). Download
-                    the annotated PDF if one is attached.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-primary/10 bg-white/80 px-3 py-2.5">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary/45 mb-1">Blackboard</p>
-                  <p>
-                    <strong className="font-semibold text-primary">My Grades</strong> → the item → view attempt / feedback. Save any
-                    returned file; if it’s only on screen, capture or print that view to PDF.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-primary/10 bg-white/80 px-3 py-2.5">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary/45 mb-1">Google Classroom</p>
-                  <p>
-                    <strong className="font-semibold text-primary">Classwork</strong> → the assignment → your turned-in work. Open the
-                    returned Doc/PDF in Drive; instructor comments usually show in the file. Export or print to PDF if needed.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-primary/10 bg-white/80 px-3 py-2.5">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary/45 mb-1">D2L Brightspace</p>
-                  <p>
-                    <strong className="font-semibold text-primary">Assignments</strong> → your submission →{' '}
-                    <strong className="font-semibold text-primary">Feedback</strong>. Use the feedback view your instructor left; download
-                    attachments or print the feedback page to PDF.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-primary/10 bg-white/80 px-3 py-2.5">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary/45 mb-1">Turnitin Feedback Studio</p>
-                  <p>
-                    Open your submission in Feedback Studio. If your school allows it,{' '}
-                    <strong className="font-semibold text-primary">download</strong> or <strong className="font-semibold text-primary">print</strong>{' '}
-                    the version with inline instructor comments and the similarity layer hidden if you only need grading marks.
-                  </p>
-                </div>
-                <div className="rounded-lg border border-primary/10 bg-white/80 px-3 py-2.5">
-                  <p className="text-[11px] font-bold uppercase tracking-wider text-primary/45 mb-1">Schoology · Microsoft Teams Education</p>
-                  <p>
-                    Go to <strong className="font-semibold text-primary">Materials / Grades / Assignments</strong>, open the graded
-                    submission, then save any file your teacher returned or print the feedback screen to PDF.
-                  </p>
-                </div>
-              </div>
-              <p className="text-[11px] text-primary/50 font-serif leading-relaxed">
-                Not sure which path your school uses? Tap <strong className="text-primary/70">Questions? Chat</strong> — the assistant can
-                ask which portal you see and walk you through it.
-              </p>
-            </div>
-            ) : null}
-          </div>
+          <PlatformSelector />
 
           <div
             onDragOver={onDragOver}
