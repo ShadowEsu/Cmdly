@@ -21,33 +21,33 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
       {/* Evidence Bento Section */}
       <section className="space-y-10">
         <div className="flex items-center gap-6">
-          <div className="flex-1 h-px bg-primary/10" />
+          <div className="flex-1 h-px bg-gray-100" />
           <div className="text-center">
-            <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/40 block mb-3">Analysis Summary</span>
-            <h2 className="font-serif text-5xl md:text-6xl text-primary font-light tracking-tight">Your Case</h2>
+            <span className="text-xs font-bold uppercase tracking-widest text-on-surface-variant block mb-3">Analysis Summary</span>
+            <h2 className="font-bold text-4xl md:text-5xl text-on-surface tracking-tight">Your Case</h2>
           </div>
-          <div className="flex-1 h-px bg-primary/10" />
+          <div className="flex-1 h-px bg-gray-100" />
         </div>
 
         {currentCase?.analysis && (
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-panel rounded-[2.5rem] p-10 md:p-12 border border-primary/10 bg-white space-y-8"
+            className="bg-white rounded-2xl p-8 md:p-10 border border-gray-100 shadow-sm space-y-8"
           >
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.35em] text-primary/40 mb-2">From your materials</p>
-                <h3 className="font-serif text-3xl md:text-4xl text-primary font-light tracking-tight">
+                <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-2">From your materials</p>
+                <h3 className="font-bold text-2xl md:text-3xl text-on-surface tracking-tight">
                   {currentCase.analysis.assignment.title || currentCase.title || 'Your submission'}
                 </h3>
                 {currentCase.analysis.assignment.subject && (
-                  <p className="text-sm text-primary/50 font-serif italic mt-1">{currentCase.analysis.assignment.subject}</p>
+                  <p className="text-sm text-on-surface-variant mt-1">{currentCase.analysis.assignment.subject}</p>
                 )}
               </div>
               <div className="text-left md:text-right space-y-1">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-primary/40">Score (as read by AI)</p>
-                <p className="font-serif text-2xl text-primary font-medium">
+                <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Score (as read by AI)</p>
+                <p className="font-bold text-2xl text-on-surface">
                   {currentCase.analysis.assignment.total_score_display ||
                     (currentCase.analysis.assignment.total_score_earned != null &&
                     currentCase.analysis.assignment.total_score_possible != null
@@ -56,11 +56,11 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
                 </p>
                 <p className="text-xs text-on-surface-variant">
                   Case strength:{' '}
-                  <span className="font-bold text-primary uppercase tracking-wide">
+                  <span className="font-bold uppercase tracking-wide" style={{ color: '#7c3aed' }}>
                     {currentCase.analysis.case_analysis.overall_case_strength}
                   </span>
                   {typeof currentCase.analysis.confidence?.overall_confidence === 'number' && (
-                    <span className="text-primary/50">
+                    <span className="text-on-surface-variant">
                       {' '}
                       · Confidence {Math.round(currentCase.analysis.confidence.overall_confidence * 100)}%
                     </span>
@@ -70,22 +70,22 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
             </div>
 
             {currentCase.analysis.case_analysis?.case_strength_reason && (
-              <p className="text-sm text-primary/70 font-serif italic leading-relaxed border-l-4 border-secondary/40 pl-4">
+              <p className="text-sm text-on-surface-variant leading-relaxed border-l-4 pl-4" style={{ borderColor: 'rgba(13,148,136,0.4)' }}>
                 {currentCase.analysis.case_analysis.case_strength_reason}
               </p>
             )}
 
             {currentCase.analysis.questions?.length > 0 && (
-              <div className="overflow-x-auto rounded-2xl border border-primary/10">
+              <div className="overflow-x-auto rounded-2xl border border-gray-100">
                 <table className="w-full text-left text-sm">
-                  <thead className="bg-primary/[0.04] text-[10px] font-bold uppercase tracking-widest text-primary/50">
+                  <thead className="bg-violet-50 text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
                     <tr>
                       <th className="px-4 py-3">Question</th>
                       <th className="px-4 py-3">Points</th>
                       <th className="px-4 py-3 hidden sm:table-cell">Notes</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-primary/5 font-serif text-primary/80">
+                  <tbody className="divide-y divide-gray-100 text-on-surface/80">
                     {currentCase.analysis.questions.slice(0, 12).map((q) => (
                       <tr key={q.question_id}>
                         <td className="px-4 py-3 font-medium">{q.question_id}</td>
@@ -94,7 +94,7 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
                             ? `${q.points_earned} / ${q.points_possible}`
                             : '—'}
                         </td>
-                        <td className="px-4 py-3 text-xs text-primary/60 hidden sm:table-cell max-w-md truncate">
+                        <td className="px-4 py-3 text-xs text-on-surface-variant hidden sm:table-cell max-w-md truncate">
                           {q.question_description || (q.deductions_with_no_comment ? 'Deductions without clear comment' : '')}
                         </td>
                       </tr>
@@ -115,7 +115,8 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
               desc: currentCase?.analysis?.case_analysis?.strongest_appeal_points?.[0]
                 ? String(currentCase.analysis.case_analysis.strongest_appeal_points[0])
                 : 'The rubric criteria and how your work was graded may not fully align. Review the table above and your letter draft.',
-              color: 'text-primary bg-primary/5'
+              color: 'bg-violet-50',
+              iconColor: '#7c3aed',
             },
             {
               icon: ICONS.Library,
@@ -124,7 +125,8 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
               desc: currentCase?.analysis?.case_analysis?.fairness_review?.summary_if_marking_questionable
                 ? String(currentCase.analysis.case_analysis.fairness_review.summary_if_marking_questionable)
                 : 'We checked whether the grading is consistent with the stated rubric and any course policies that apply.',
-              color: 'text-secondary bg-secondary/5'
+              color: 'bg-teal-50',
+              iconColor: '#0d9488',
             },
             {
               icon: ICONS.FileText,
@@ -134,23 +136,24 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
                 (currentCase?.analysis?.case_analysis?.unexplained_deductions?.length ?? 0) > 0
                   ? `${currentCase?.analysis?.case_analysis?.unexplained_deductions?.length} area(s) with points off but unclear explanation.`
                   : 'Points were deducted without a written explanation. You have the right to ask why marks were taken.',
-              color: 'text-[#735c00] bg-[#735c00]/5'
+              color: 'bg-amber-50',
+              iconColor: '#d97706',
             }
           ].map((item, idx) => (
             <motion.div 
               key={idx}
-              whileHover={{ y: -12, scale: 1.02 }}
-              className="glass-panel p-12 rounded-[3.5rem] flex flex-col gap-10 transition-all duration-500 hover:shadow-huge bg-white border-2 border-primary/5"
+              whileHover={{ y: -4, scale: 1.01 }}
+              className="bg-white rounded-2xl p-8 flex flex-col gap-6 transition-all duration-300 hover:shadow-md border border-gray-100"
             >
               <div className="flex justify-between items-start">
-                <div className={`p-4 rounded-2xl ${item.color} shadow-sm`}>
-                  <item.icon size={24} strokeWidth={1.5} />
+                <div className={`p-3 rounded-xl ${item.color}`}>
+                  <item.icon size={22} strokeWidth={1.8} style={{ color: (item as any).iconColor }} />
                 </div>
-                <span className="text-[10px] font-bold tracking-[0.2em] text-primary/40 uppercase font-mono italic">{item.val}</span>
+                <span className="text-[10px] font-bold tracking-wider text-on-surface-variant uppercase">{item.val}</span>
               </div>
-              <div className="space-y-3">
-                <h3 className="font-serif text-2xl text-primary font-medium tracking-tight uppercase">{item.title}</h3>
-                <p className="text-sm text-primary/60 font-serif italic leading-relaxed">
+              <div className="space-y-2">
+                <h3 className="font-bold text-lg text-on-surface tracking-tight">{item.title}</h3>
+                <p className="text-sm text-on-surface-variant leading-relaxed">
                   {item.desc}
                 </p>
               </div>
@@ -163,14 +166,15 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-24">
         {/* Sidebar Controls */}
         <div className="lg:col-span-4 space-y-24">
-          <div className="glass-panel p-12 rounded-[3.5rem] space-y-12 bg-primary/[0.02] border-2 border-primary/5 shadow-huge">
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary leading-none">Letter Tone</h4>
+          <div className="bg-white rounded-2xl p-8 space-y-8 border border-gray-100 shadow-sm">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant leading-none">Letter Tone</h4>
             
             <div className="space-y-12 relative px-2">
-              <div className="h-[4px] bg-primary/10 rounded-full w-full relative">
-                 <motion.div 
+              <div className="h-[4px] bg-violet-100 rounded-full w-full relative">
+                 <motion.div
                    animate={{ left: `${tone}%` }}
-                   className="absolute -top-[6px] -ml-2 w-4 h-4 bg-primary rounded-full shadow-[0_0_20px_rgba(0,35,111,0.6)] cursor-pointer border-2 border-white"
+                   className="absolute -top-[6px] -ml-2 w-4 h-4 rounded-full cursor-pointer border-2 border-white shadow-lg"
+                   style={{ background: '#7c3aed' }}
                  />
                  <input 
                    type="range" 
@@ -180,34 +184,35 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
                    className="absolute inset-0 opacity-0 cursor-pointer"
                  />
               </div>
-              <div className="flex justify-between text-[10px] font-bold text-primary/30 uppercase tracking-widest italic">
+              <div className="flex justify-between text-[10px] font-bold text-on-surface-variant uppercase tracking-widest">
                 <span>Analytical</span>
                 <span>Assertive</span>
               </div>
             </div>
             
-            <p className="text-lg text-primary/50 font-serif italic leading-relaxed">
+            <p className="text-sm text-on-surface-variant leading-relaxed">
               {tone < 33 ? 'Calm and analytical — best for straightforward rubric errors.' : tone < 66 ? 'Balanced — professional and firm without being aggressive.' : 'Assertive — clearly pushes back on the grading decision.'}
             </p>
           </div>
 
-          <div className="space-y-12 pl-12">
-            <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/30 leading-none">Review Pipeline Milestone</h4>
+          <div className="space-y-8 pl-8">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant leading-none">Review Pipeline</h4>
             <div className="space-y-16 relative">
-              <div className="absolute left-[-32px] top-4 bottom-4 w-[2px] bg-primary/5" />
+              <div className="absolute left-[-32px] top-4 bottom-4 w-[2px] bg-gray-100" />
               {[
                 { step: 1, title: 'Review the Analysis', desc: 'Check the findings and confirm they match what happened.', active: true },
                 { step: 2, title: 'Review the Letter', desc: 'Read your draft and adjust the tone if needed.', active: false },
                 { step: 3, title: 'Submit Your Appeal', desc: 'Send the letter to your professor or review committee.', active: false },
               ].map((s, idx) => (
                 <div key={idx} className="relative group">
-                  <div className={`absolute -left-[43px] top-1 w-6 h-6 rounded-xl border-2 bg-white transition-all shadow-huge ${
-                    s.active ? 'bg-primary border-primary scale-110' : 'border-primary/10'
-                  }`} />
-                  <p className={`text-[10px] font-bold uppercase tracking-[0.3em] mb-2 leading-none ${s.active ? 'text-primary' : 'text-primary/20'}`}>
+                  <div className={`absolute -left-[43px] top-1 w-6 h-6 rounded-xl border-2 bg-white transition-all shadow-sm ${
+                    s.active ? 'scale-110 border-violet-600' : 'border-gray-200'
+                  }`} style={s.active ? { background: '#7c3aed' } : undefined} />
+                  <p className={`text-[10px] font-bold uppercase tracking-wider mb-2 leading-none ${s.active ? '' : 'text-on-surface-variant/40'}`}
+                    style={s.active ? { color: '#7c3aed' } : undefined}>
                     PHASE {s.step}: {s.title}
                   </p>
-                  <p className="text-lg text-primary/40 font-serif italic leading-relaxed">{s.desc}</p>
+                  <p className="text-sm text-on-surface-variant leading-relaxed">{s.desc}</p>
                 </div>
               ))}
             </div>
@@ -216,14 +221,12 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
 
         {/* Paper Editor */}
         <div className="lg:col-span-8 flex flex-col items-center">
-          <motion.div 
-            initial={{ opacity: 0, y: 50 }}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#fdfcf7] shadow-huge rounded-sm p-16 md:p-32 min-h-[1200px] w-full border border-primary/5 flex flex-col relative transition-all"
+            className="bg-white shadow-sm rounded-2xl p-10 md:p-16 min-h-[800px] w-full border border-gray-100 flex flex-col relative transition-all"
           >
-            <div className="absolute inset-0 paper-texture opacity-40 pointer-events-none" />
-            
-            <header className="border-b-2 border-primary/10 pb-16 mb-16 flex justify-between items-start relative z-10">
+            <header className="border-b-2 border-gray-100 pb-10 mb-10 flex justify-between items-start relative z-10">
               <div className="space-y-4">
                 {[
                   { label: 'TO:', val: 'Professor / Academic Review Committee' },
@@ -232,22 +235,22 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
                   { label: 'RE:', val: currentCase?.title || 'Grade Appeal' }
                 ].map((row, i) => (
                   <div key={i} className="flex gap-6">
-                     <p className="font-bold text-primary/30 uppercase tracking-[0.3em] text-[10px] min-w-[70px] mt-[1px]">{row.label}</p>
-                     <p className={`text-lg font-serif ${row.label === 'CASE:' ? 'font-bold text-primary italic' : 'text-primary/80 font-medium'}`}>{row.val}</p>
+                     <p className="font-bold text-on-surface-variant uppercase tracking-wider text-[10px] min-w-[70px] mt-[1px]">{row.label}</p>
+                     <p className={`text-base font-medium ${row.label === 'CASE:' ? 'font-bold italic' : 'text-on-surface'}`} style={row.label === 'CASE:' ? { color: '#7c3aed' } : undefined}>{row.val}</p>
                   </div>
                 ))}
               </div>
-              <div className="p-5 bg-primary/5 rounded-[2rem] text-primary/20 hover:text-primary transition-all cursor-pointer border-2 border-primary/5 active:scale-95">
+              <div className="p-3 bg-violet-50 rounded-xl text-violet-300 hover:text-violet-600 transition-all cursor-pointer border border-violet-100 active:scale-95">
                 <ICONS.Edit size={24} />
               </div>
             </header>
 
-            <div className="flex-grow font-serif text-xl text-primary/80 space-y-8 leading-relaxed text-justify relative z-10">
-              <p className="text-2xl font-medium italic mb-10 text-primary tracking-tight">Dear Professor / Review Committee,</p>
+            <div className="flex-grow text-base text-on-surface/85 space-y-6 leading-relaxed text-justify relative z-10">
+              <p className="text-xl font-semibold mb-8 text-on-surface tracking-tight">Dear Professor / Review Committee,</p>
 
               <p>
                 I am writing to formally request a reconsideration of the grade I received on{' '}
-                <span className="bg-primary/5 border-b border-primary/20 px-1 mx-1 inline-block pb-0.5">
+                <span className="bg-violet-50 border-b border-violet-300 px-1 mx-1 inline-block pb-0.5">
                   {currentCase?.title || 'my recent assignment'}
                 </span>.
                 After carefully reviewing my work against the rubric and the feedback provided, I believe there are specific areas where the grading may not accurately reflect my performance.
@@ -269,15 +272,15 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
                 I appreciate your time and I am open to a conversation about this. I am not disputing the grading lightly — I simply want to make sure the evaluation reflects my actual work.
               </p>
 
-              <div className="pt-16 space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/30 ml-1">Signed</p>
-                <p className="font-serif italic text-4xl font-light text-primary/95">Your Name</p>
+              <div className="pt-10 space-y-2">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-on-surface-variant ml-1">Signed</p>
+                <p className="font-serif italic text-3xl font-light text-on-surface/90">Your Name</p>
               </div>
             </div>
 
-            <footer className="mt-16 pt-8 border-t border-primary/5 flex justify-between items-center opacity-30 relative z-10">
-              <p className="text-[9px] font-bold tracking-[0.4em] uppercase text-primary">Generated by Regrade</p>
-              <p className="text-[9px] text-primary/40 font-mono">{new Date().toLocaleDateString()}</p>
+            <footer className="mt-10 pt-6 border-t border-gray-100 flex justify-between items-center opacity-40 relative z-10">
+              <p className="text-[9px] font-bold tracking-wider uppercase text-on-surface-variant">Generated by Regrade</p>
+              <p className="text-[9px] text-on-surface-variant font-mono">{new Date().toLocaleDateString()}</p>
             </footer>
           </motion.div>
         </div>
@@ -288,23 +291,25 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
         <motion.div 
           initial={{ y: 150, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="glass-panel max-w-5xl w-full rounded-[3rem] py-8 px-16 flex flex-col md:flex-row justify-between items-center gap-10 shadow-huge bg-[#001438] text-white border-2 border-white/10"
+          className="max-w-5xl w-full rounded-2xl py-5 px-8 flex flex-col md:flex-row justify-between items-center gap-6 shadow-xl text-white border border-white/10"
+          style={{ background: '#1a1033' }}
         >
           <div className="flex items-center gap-10">
              <div className="flex flex-col">
                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 leading-none mb-1">Status</span>
-               <span className="text-xs font-bold tracking-[0.2em] uppercase text-[#6cf8bb]">Appeal Letter Ready</span>
+               <span className="text-xs font-bold tracking-wider uppercase text-teal-400">Appeal Letter Ready</span>
              </div>
              <div className="h-12 w-px bg-white/10 hidden md:block" />
           </div>
           <div className="flex gap-4 sm:gap-6 w-full md:w-auto">
-             <button type="button" className="flex-1 md:flex-none flex items-center justify-center gap-3 min-h-[3.25rem] px-6 sm:px-10 py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-all text-[11px] font-bold uppercase tracking-[0.25em] text-white/70">
-               <ICONS.Download size={22} /> Download PDF
+             <button type="button" className="flex-1 md:flex-none flex items-center justify-center gap-2 min-h-[2.75rem] px-5 py-3 rounded-xl border border-white/10 hover:bg-white/5 transition-all text-xs font-semibold text-white/70">
+               <ICONS.Download size={18} /> Download PDF
              </button>
-             <button 
+             <button
                type="button"
                onClick={onFinalize}
-               className="flex-1 md:flex-none flex items-center justify-center gap-3 min-h-[3.25rem] px-8 sm:px-12 py-4 rounded-2xl bg-primary text-white hover:shadow-[0_0_30px_rgba(0,35,111,0.5)] transition-all text-[11px] font-bold uppercase tracking-[0.25em] shadow-xl border border-white/20 active:scale-[0.98]"
+               className="flex-1 md:flex-none flex items-center justify-center gap-2 min-h-[2.75rem] px-6 py-3 rounded-xl text-white transition-all text-xs font-semibold shadow-lg border border-white/20 active:scale-[0.98] hover:opacity-90"
+               style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #0d9488 100%)' }}
              >
                View Full Report <ICONS.ArrowRight size={22} />
              </button>

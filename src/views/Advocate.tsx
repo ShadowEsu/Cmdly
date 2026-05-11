@@ -48,34 +48,32 @@ export default function Advocate({ onBack }: { onBack: () => void }) {
   };
 
   return (
-    <div className="flex flex-col w-full max-w-3xl mx-auto min-h-[min(88dvh,calc(100vh-7rem))] h-[min(88dvh,calc(100vh-7rem))] sm:rounded-[3rem] rounded-2xl overflow-hidden border-2 border-primary/15 bg-white/85 backdrop-blur-3xl shadow-2xl relative">
-      <div className="absolute inset-0 paper-texture opacity-5 pointer-events-none" />
-      
+    <div className="flex flex-col w-full max-w-3xl mx-auto min-h-[min(88dvh,calc(100vh-7rem))] h-[min(88dvh,calc(100vh-7rem))] sm:rounded-2xl rounded-2xl overflow-hidden border border-gray-100 bg-white shadow-sm relative">
       {/* Header */}
-      <header className="p-4 sm:p-8 border-b border-primary/10 flex flex-wrap items-center justify-between gap-4 bg-gradient-to-b from-primary/[0.07] to-transparent relative z-10">
-        <div className="flex items-center gap-3 sm:gap-6 min-w-0">
+      <header className="p-4 sm:p-6 border-b border-gray-100 flex flex-wrap items-center justify-between gap-4 bg-white relative z-10">
+        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
           <button
             type="button"
             onClick={onBack}
-            className="p-3 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white hover:bg-primary/5 rounded-2xl transition-all text-primary shadow-sm border border-primary/10 shrink-0"
+            className="p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center bg-gray-50 hover:bg-violet-50 rounded-xl transition-all text-on-surface-variant hover:text-violet-600 border border-gray-100 shrink-0"
             aria-label="Back"
           >
-            <ICONS.ChevronLeft size={20} />
+            <ICONS.ChevronLeft size={18} />
           </button>
           <div className="min-w-0">
-            <h2 className="font-serif text-xl sm:text-2xl text-primary font-light tracking-tight">Appeal assistant</h2>
-            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1">
-              <div className="w-1.5 h-1.5 bg-[#6cf8bb] rounded-full animate-pulse shrink-0" />
-              <span className="text-[10px] sm:text-[11px] uppercase font-light tracking-[0.28em] text-primary/50">
-                Chat · same as Home card
+            <h2 className="font-bold text-base text-on-surface">Appeal assistant</h2>
+            <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-0.5">
+              <div className="w-1.5 h-1.5 bg-teal-500 rounded-full animate-pulse shrink-0" />
+              <span className="text-[10px] font-semibold text-on-surface-variant">
+                Online · here to help
               </span>
             </div>
           </div>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-2">
            {[ICONS.Shield, ICONS.Download].map((Icon, i) => (
-             <button key={i} className="p-3 bg-white/50 text-primary/30 hover:text-primary transition-all rounded-xl border border-primary/5">
-                <Icon size={18} />
+             <button key={i} className="p-2.5 bg-gray-50 text-on-surface-variant hover:text-violet-600 transition-all rounded-xl border border-gray-100">
+                <Icon size={16} />
              </button>
            ))}
         </div>
@@ -90,11 +88,13 @@ export default function Advocate({ onBack }: { onBack: () => void }) {
             key={i} 
             className={`flex ${m.role === 'ai' ? 'justify-start' : 'justify-end'}`}
           >
-            <div className={`max-w-[92%] sm:max-w-[85%] p-5 sm:p-8 rounded-[1.5rem] sm:rounded-[2rem] text-[15px] sm:text-lg font-serif italic font-light leading-relaxed ${
-              m.role === 'ai' 
-                ? 'bg-white/80 border border-primary/5 text-primary/80 shadow-[0_10px_30px_-10px_rgba(0,35,111,0.05)]' 
-                : 'bg-primary text-white shadow-xl shadow-primary/20'
-            }`}>
+            <div className={`max-w-[92%] sm:max-w-[85%] p-4 sm:p-5 rounded-2xl text-sm leading-relaxed ${
+              m.role === 'ai'
+                ? 'bg-violet-50 border border-violet-100 text-on-surface'
+                : 'text-white shadow-lg'
+            }`}
+            style={m.role !== 'ai' ? { background: '#7c3aed' } : undefined}
+            >
               {m.text}
             </div>
           </motion.div>
@@ -105,10 +105,10 @@ export default function Advocate({ onBack }: { onBack: () => void }) {
             animate={{ opacity: 1 }}
             className="flex justify-start"
           >
-            <div className="bg-white/80 border border-primary/5 p-6 rounded-2xl flex gap-2">
-              <div className="w-2 h-2 bg-primary/20 rounded-full animate-bounce" />
-              <div className="w-2 h-2 bg-primary/20 rounded-full animate-bounce delay-100" />
-              <div className="w-2 h-2 bg-primary/20 rounded-full animate-bounce delay-200" />
+            <div className="bg-violet-50 border border-violet-100 p-4 rounded-2xl flex gap-2">
+              <div className="w-2 h-2 bg-violet-400 rounded-full animate-bounce" />
+              <div className="w-2 h-2 bg-violet-400 rounded-full animate-bounce delay-100" />
+              <div className="w-2 h-2 bg-violet-400 rounded-full animate-bounce delay-200" />
             </div>
           </motion.div>
         )}
@@ -116,30 +116,31 @@ export default function Advocate({ onBack }: { onBack: () => void }) {
       </div>
 
       {/* Input Area */}
-      <form onSubmit={handleSend} className="p-4 sm:p-8 border-t border-primary/10 bg-white/90 relative z-10 pb-[max(1rem,env(safe-area-inset-bottom))]">
+      <form onSubmit={handleSend} className="p-4 sm:p-5 border-t border-gray-100 bg-white relative z-10 pb-[max(1rem,env(safe-area-inset-bottom))]">
         <div className="relative flex items-center max-w-2xl mx-auto">
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder="Ask about rubrics, feedback, or appeal steps…"
-            className="w-full bg-[#fdfcf7] border border-primary/10 rounded-[2rem] px-6 sm:px-10 py-4 sm:py-6 outline-none focus:ring-2 focus:ring-primary/15 transition-all pr-[3.75rem] text-[15px] sm:text-base font-serif italic font-light text-primary/85 placeholder:text-primary/30 min-h-[48px]"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-5 py-3 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 transition-all pr-14 text-sm text-on-surface placeholder:text-on-surface-variant/50 min-h-[48px]"
           />
           <button
             type="submit"
             disabled={loading}
-            className="absolute right-2 sm:right-3 p-3 sm:p-4 min-w-[44px] min-h-[44px] flex items-center justify-center bg-primary text-white rounded-2xl shadow-xl shadow-primary/20 hover:scale-105 active:scale-95 transition-all outline-none disabled:opacity-50 disabled:scale-100"
+            className="absolute right-2 p-2.5 min-w-[40px] min-h-[40px] flex items-center justify-center text-white rounded-xl shadow-md hover:opacity-90 active:scale-95 transition-all outline-none disabled:opacity-50 disabled:scale-100"
+            style={{ background: '#7c3aed' }}
             aria-label="Send"
           >
-            {loading ? <ICONS.RefreshCcw className="animate-spin" size={20} /> : <ICONS.Send size={20} />}
+            {loading ? <ICONS.RefreshCcw className="animate-spin" size={18} /> : <ICONS.Send size={18} />}
           </button>
         </div>
-        <div className="flex justify-center items-center gap-4 mt-6">
-           <div className="h-px w-8 bg-primary/10" />
-           <p className="text-[10px] text-primary/35 font-light uppercase tracking-[0.32em] text-center px-2">
+        <div className="flex justify-center items-center gap-3 mt-3">
+           <div className="h-px w-6 bg-gray-100" />
+           <p className="text-[10px] text-on-surface-variant font-medium uppercase tracking-wider text-center px-2">
               Educational support only · follow your school&apos;s policy
            </p>
-           <div className="h-px w-8 bg-primary/10" />
+           <div className="h-px w-6 bg-gray-100" />
         </div>
       </form>
     </div>

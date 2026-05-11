@@ -103,18 +103,19 @@ const Profile: React.FC = () => {
     }
   };
 
-  if (loading) return <div className="flex justify-center py-24"><ICONS.AILogo className="animate-spin text-primary" /></div>;
+  if (loading) return <div className="flex justify-center py-24"><ICONS.AILogo className="animate-spin" style={{ color: '#7c3aed' }} /></div>;
 
   if (!user) {
     return (
       <div className="max-w-md mx-auto text-center py-24 space-y-6">
-        <div className="glass-panel p-12 rounded-3xl space-y-6">
-          <ICONS.Shield size={48} className="mx-auto text-primary opacity-20" />
-          <h2 className="font-serif text-3xl text-primary">Access Restricted</h2>
-          <p className="text-on-surface-variant font-medium">Please sign in to access your profile and appeal history.</p>
-          <button 
+        <div className="bg-white p-10 rounded-2xl border border-gray-100 shadow-sm space-y-5">
+          <ICONS.Shield size={40} className="mx-auto text-violet-300" />
+          <h2 className="font-bold text-2xl text-on-surface">Access Restricted</h2>
+          <p className="text-sm text-on-surface-variant">Please sign in to access your profile and appeal history.</p>
+          <button
             onClick={loginWithGoogle}
-            className="w-full bg-primary text-white py-4 rounded-xl font-bold hover:shadow-lg transition-all flex items-center justify-center gap-3"
+            className="w-full text-white py-3 px-6 rounded-xl font-semibold text-sm hover:opacity-90 transition-all flex items-center justify-center gap-3 shadow-lg"
+            style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #0d9488 100%)' }}
           >
              Sign in with Google
           </button>
@@ -126,38 +127,40 @@ const Profile: React.FC = () => {
   return (
     <div className="max-w-6xl mx-auto space-y-24 pb-48 px-6 lg:px-12">
       {/* Profile/Settings Header */}
-      <section className="relative pt-32 pb-24 border-b border-primary/10">
+      <section className="relative pt-16 pb-10 border-b border-gray-100">
         <div className="flex flex-col lg:flex-row gap-16 items-center lg:items-end">
           <div className="relative group">
-            <div className="w-56 h-56 rounded-[3.5rem] bg-white border-2 border-primary/10 p-2 overflow-hidden relative z-10 transition-all duration-700 shadow-huge">
+            <div className="w-32 h-32 rounded-2xl bg-white border-2 p-1 overflow-hidden relative z-10 transition-all shadow-md"
+              style={{ borderColor: '#7c3aed' }}
+            >
               <img
                 src={user.photoURL || DEFAULT_AVATAR_SRC}
                 alt=""
-                className="w-full h-full rounded-[3rem] object-cover"
+                className="w-full h-full rounded-xl object-cover"
               />
             </div>
-            <div className="absolute inset-0 bg-primary/10 blur-[100px] rounded-full scale-150 opacity-20 -z-0"></div>
-            <button 
-              className="absolute -bottom-4 -right-4 bg-primary text-white p-5 rounded-3xl shadow-huge z-20 hover:scale-110 transition-transform border-4 border-surface"
+            <button
+              className="absolute -bottom-2 -right-2 text-white p-2.5 rounded-xl shadow-lg z-20 hover:scale-110 transition-transform border-2 border-white"
+              style={{ background: '#7c3aed' }}
             >
-              <ICONS.Camera size={24} />
+              <ICONS.Camera size={16} />
             </button>
           </div>
           
-          <div className="flex-1 text-center lg:text-left space-y-4">
-            <div className="flex items-center justify-center lg:justify-start gap-4">
-               <span className="text-[12px] font-light uppercase tracking-[0.45em] text-primary/45">Your Profile</span>
-               <div className="h-px w-12 bg-primary/10" />
+          <div className="flex-1 text-center lg:text-left space-y-3">
+            <div className="flex items-center justify-center lg:justify-start gap-3">
+               <span className="text-xs font-semibold uppercase tracking-wider text-on-surface-variant">Your Profile</span>
+               <div className="h-px w-8 bg-gray-200" />
             </div>
-            <h1 className="font-serif text-6xl md:text-8xl font-light text-primary tracking-tight italic leading-none uppercase">
+            <h1 className="font-bold text-3xl md:text-4xl text-on-surface tracking-tight leading-tight">
               {profileData.name || 'Anonymous User'}
             </h1>
-            <div className="flex items-center justify-center lg:justify-start gap-6 pt-4">
-              <div className="flex items-center gap-2 px-6 py-2 bg-green-500/10 rounded-full border border-green-500/20">
-                <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-                <span className="text-[11px] font-light text-green-700 uppercase tracking-widest">Session verified</span>
+            <div className="flex items-center justify-center lg:justify-start gap-4 pt-2">
+              <div className="flex items-center gap-2 px-4 py-1.5 bg-green-50 rounded-full border border-green-200">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
+                <span className="text-xs font-semibold text-green-700">Session verified</span>
               </div>
-              <p className="text-[11px] font-light text-on-surface-variant/45 uppercase tracking-[0.32em]">
+              <p className="text-xs font-medium text-on-surface-variant">
                 {user.email}
               </p>
             </div>
@@ -179,20 +182,21 @@ const Profile: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-12">
                     <div className="group">
-                      <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/30 mb-2">Major / Field of Study</p>
-                      <p className="font-serif text-4xl font-light text-primary italic uppercase tracking-tight">{profileData.major || 'Not set yet'}</p>
-                      <div className="h-px w-full bg-primary/5 mt-6 group-hover:bg-primary/20 transition-colors" />
+                      <p className="text-xs font-bold uppercase tracking-wider text-on-surface-variant mb-1.5">Major / Field of Study</p>
+                      <p className="font-bold text-2xl text-on-surface">{profileData.major || 'Not set yet'}</p>
+                      <div className="h-px w-full bg-gray-100 mt-4 group-hover:bg-violet-200 transition-colors" />
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-[3rem] p-12 bg-primary/[0.02] border border-primary/5 space-y-8 flex flex-col justify-center">
-                    <h3 className="font-serif text-2xl font-light text-primary leading-tight">Edit Your Info</h3>
-                    <p className="text-lg text-primary/50 font-serif italic leading-relaxed">
+                  <div className="bg-violet-50 rounded-2xl p-8 border border-violet-100 space-y-4 flex flex-col justify-center">
+                    <h3 className="font-bold text-lg text-on-surface">Edit Your Info</h3>
+                    <p className="text-sm text-on-surface-variant leading-relaxed">
                       Keep your details up to date so Regrade can personalize your appeal letters.
                     </p>
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="w-full py-5 rounded-2xl bg-primary text-white font-bold uppercase tracking-[0.3em] text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all"
+                      className="w-full py-3 rounded-xl text-white font-semibold text-sm shadow-md hover:-translate-y-0.5 transition-all"
+                      style={{ background: '#7c3aed' }}
                     >
                       Edit Profile
                     </button>
@@ -200,9 +204,9 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div className="flex gap-4">
-                   <button 
+                   <button
                     onClick={handleSignOut}
-                    className="px-10 py-5 rounded-2xl border border-red-500/20 text-red-500/40 font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-red-500 hover:text-white transition-all"
+                    className="px-6 py-2.5 rounded-xl border border-red-200 text-red-400 font-semibold text-sm hover:bg-red-500 hover:text-white transition-all"
                   >
                     Sign Out
                   </button>
@@ -214,44 +218,45 @@ const Profile: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 onSubmit={handleUpdate}
-                className="glass-panel rounded-[4rem] p-16 space-y-12 border border-primary/10 bg-white shadow-huge"
+                className="bg-white rounded-2xl p-8 space-y-6 border border-gray-100 shadow-sm"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-4">Legal Full Name</label>
-                    <input 
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-on-surface-variant">Legal Full Name</label>
+                    <input
                       type="text"
                       required
                       value={profileData.name}
                       onChange={(e) => setProfileData({...profileData, name: e.target.value})}
-                      className="w-full bg-surface/50 border border-primary/10 rounded-[2rem] px-8 py-5 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 text-xl font-serif italic"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 text-sm text-on-surface"
                     />
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-4">Major / Course Field</label>
-                    <input 
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-on-surface-variant">Major / Course Field</label>
+                    <input
                       type="text"
                       required
                       value={profileData.major}
                       onChange={(e) => setProfileData({...profileData, major: e.target.value})}
-                      className="w-full bg-surface/50 border border-primary/10 rounded-[2rem] px-8 py-5 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 text-xl font-serif italic"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-violet-500/20 focus:border-violet-400 text-sm text-on-surface"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-6 pt-12 border-t border-primary/5">
-                  <button 
+                <div className="flex gap-4 pt-6 border-t border-gray-100">
+                  <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 py-5 font-bold uppercase tracking-[0.3em] text-[10px] text-primary/40 hover:bg-primary/5 rounded-2xl transition-all border border-transparent hover:border-primary/10"
+                    className="flex-1 py-3 font-semibold text-sm text-on-surface-variant hover:bg-gray-50 rounded-xl transition-all border border-gray-100"
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     type="submit"
                     disabled={scanning}
-                    className="flex-1 py-5 font-bold uppercase tracking-[0.3em] text-[10px] text-white bg-primary rounded-2xl shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                    className="flex-1 py-3 font-semibold text-sm text-white rounded-xl shadow-md hover:-translate-y-0.5 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                    style={{ background: '#7c3aed' }}
                   >
                     {scanning ? <ICONS.RefreshCcw className="animate-spin" size={20} /> : null}
                     {scanning ? 'Saving...' : 'Save Changes'}
@@ -264,30 +269,30 @@ const Profile: React.FC = () => {
 
         {/* Right Column: Security Logs */}
         <div className="lg:col-span-12 xl:col-span-4 lg:sticky lg:top-32 h-fit">
-           <div className="glass-panel rounded-[3.5rem] p-12 border border-primary/10 bg-primary/5 space-y-12">
-              <div className="space-y-2">
-                <h3 className="text-xs font-black uppercase tracking-[0.6em] text-primary/50">Account Activity</h3>
-                <p className="text-xs font-serif italic text-primary/30 leading-snug">Recent security events for your account.</p>
+           <div className="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm space-y-6">
+              <div className="space-y-1">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-on-surface-variant">Account Activity</h3>
+                <p className="text-xs text-on-surface-variant">Recent security events for your account.</p>
               </div>
 
-              <div className="space-y-8">
+              <div className="space-y-4">
                 {securityLogs.map((log, i) => (
-                  <div key={i} className="flex justify-between items-start group">
-                    <div className="flex gap-6">
-                       <div className="mt-1 w-2 h-2 rounded-full bg-primary/40 group-hover:scale-150 transition-transform shadow-[0_0_10px_rgba(0,35,111,0.2)]" />
-                       <div className="space-y-1">
-                          <p className="text-xs font-black uppercase tracking-widest text-primary/80 leading-none">{log.event}</p>
-                          <p className="text-[10px] font-bold text-primary/20 uppercase tracking-tighter italic">{log.time}</p>
+                  <div key={i} className="flex justify-between items-start gap-3">
+                    <div className="flex gap-3">
+                       <div className="mt-1 w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: '#7c3aed' }} />
+                       <div className="space-y-0.5">
+                          <p className="text-xs font-semibold text-on-surface leading-none">{log.event}</p>
+                          <p className="text-[10px] text-on-surface-variant">{log.time}</p>
                        </div>
                     </div>
-                    <span className="text-[10px] font-black text-green-700/60 bg-green-500/5 px-4 py-1.5 rounded-full uppercase tracking-tighter border border-green-500/10">Passed</span>
+                    <span className="text-[10px] font-semibold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-full border border-teal-100 shrink-0">Passed</span>
                   </div>
                 ))}
               </div>
 
-              <div className="pt-12 border-t border-primary/10 flex flex-col items-center text-center space-y-6">
-                 <ICONS.Shield size={48} className="text-primary/10" />
-                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/30">Regrade — Your data is private</p>
+              <div className="pt-5 border-t border-gray-100 flex flex-col items-center text-center space-y-3">
+                 <ICONS.Shield size={32} className="text-violet-200" />
+                 <p className="text-xs font-medium text-on-surface-variant">Regrade — Your data is private</p>
               </div>
            </div>
         </div>
@@ -301,9 +306,10 @@ const Profile: React.FC = () => {
             exit={{ opacity: 0, y: 50 }}
             className="fixed bottom-24 left-4 right-4 z-50 text-center"
           >
-            <div className="bg-primary text-white rounded-2xl p-4 inline-flex items-center gap-3 shadow-2xl border border-white/20">
-              <ICONS.Check size={20} />
-              <p className="text-sm font-medium">Profile updated successfully</p>
+            <div className="text-white rounded-2xl p-4 inline-flex items-center gap-3 shadow-2xl border border-white/20"
+              style={{ background: 'linear-gradient(135deg, #7c3aed 0%, #0d9488 100%)' }}>
+              <ICONS.Check size={18} />
+              <p className="text-sm font-semibold">Profile updated successfully</p>
             </div>
           </motion.div>
         )}

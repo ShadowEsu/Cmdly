@@ -23,54 +23,56 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
   ];
 
   return (
-    <div className="min-h-screen flex flex-col relative paper-texture selection:bg-primary/10">
-      <header className="sticky top-0 z-50 bg-white/60 backdrop-blur-3xl institutional-border pt-[env(safe-area-inset-top)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 min-h-14 md:min-h-24 py-2 md:py-0 flex items-center justify-between gap-2">
-          <div 
+    <div className="min-h-screen flex flex-col relative bg-surface selection:bg-primary/10">
+      <header className="sticky top-0 z-50 bg-white border-b border-gray-100 pt-[env(safe-area-inset-top)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 min-h-14 md:min-h-16 py-2 md:py-0 flex items-center justify-between gap-2">
+          <div
             className="flex items-center gap-4 cursor-pointer group"
             onClick={() => onTabChange('dashboard')}
           >
-            <Logo size="md" className="!text-left" />
+            <span className="text-xl font-extrabold tracking-tight" style={{ color: '#7c3aed' }}>regrade</span>
           </div>
 
-          <div className="flex items-center gap-12">
-            <nav className="hidden lg:flex items-center gap-8 xl:gap-10">
+          <div className="flex items-center gap-10">
+            <nav className="hidden lg:flex items-center gap-8">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
                   onClick={() => onTabChange(tab.id)}
-                  className={`font-sans text-sm font-light uppercase tracking-[0.28em] transition-all relative py-2 ${
-                    activeTab === tab.id ? 'text-primary' : 'text-on-surface-variant/50 hover:text-primary'
+                  className={`font-semibold text-sm transition-all relative py-2 ${
+                    activeTab === tab.id ? '' : 'text-on-surface-variant hover:text-on-surface'
                   }`}
+                  style={activeTab === tab.id ? { color: '#7c3aed' } : undefined}
                 >
                   {tab.label}
                   {activeTab === tab.id && (
-                    <motion.div 
+                    <motion.div
                       layoutId="nav-pill"
-                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-primary rounded-full shadow-[0_0_10px_rgba(0,35,111,0.2)]"
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 rounded-full"
+                      style={{ background: '#7c3aed' }}
                     />
                   )}
                 </button>
               ))}
             </nav>
-            
-            <div 
-              className="flex items-center gap-4 cursor-pointer group"
+
+            <div
+              className="flex items-center gap-3 cursor-pointer group"
               onClick={() => onTabChange('profile')}
             >
               {firstName && (
                 <div className="text-right hidden sm:block">
-                  <p className="text-[11px] font-light uppercase tracking-[0.28em] text-primary opacity-45 leading-none mb-1">
+                  <p className="text-xs font-semibold text-on-surface-variant leading-none mb-0.5">
                     Signed in as
                   </p>
-                  <p className="text-sm font-light text-primary uppercase tracking-wide">{firstName}</p>
+                  <p className="text-sm font-bold text-on-surface">{firstName}</p>
                 </div>
               )}
-              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl border-2 border-primary/10 p-0.5 overflow-hidden bg-white shadow-xl transition-all group-hover:border-primary/40">
+              <div className="w-10 h-10 rounded-xl border-2 p-0.5 overflow-hidden bg-white shadow-sm transition-all group-hover:shadow-md" style={{ borderColor: 'rgba(124,58,237,0.2)' }}>
                 <img
                   src={user?.photoURL || DEFAULT_AVATAR_SRC}
                   alt="Profile"
-                  className="w-full h-full object-cover rounded-xl"
+                  className="w-full h-full object-cover rounded-lg"
                 />
               </div>
             </div>
@@ -83,32 +85,34 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
           key={activeTab}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-          className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-16"
+          transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+          className="max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-8 md:py-10"
         >
           {children}
         </motion.div>
       </main>
 
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-primary/15 px-2 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100 px-2 pt-2.5 pb-[max(1rem,env(safe-area-inset-bottom))]"
         aria-label="Main"
       >
         <div className="flex justify-around items-stretch max-w-lg mx-auto gap-1">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center justify-center gap-1 transition-all flex-1 min-h-[3.25rem] min-w-0 py-2 px-1 rounded-2xl active:scale-[0.98] ${
-                activeTab === tab.id ? 'text-primary bg-primary/[0.06]' : 'text-on-surface-variant/45'
-              }`}
-            >
-              <tab.icon className="w-6 h-6 shrink-0" strokeWidth={activeTab === tab.id ? 2.35 : 1.85} />
-              <span className="text-[10px] font-semibold uppercase tracking-wide leading-tight text-center">
-                {tab.label}
-              </span>
-            </button>
-          ))}
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => onTabChange(tab.id)}
+                className="flex flex-col items-center justify-center gap-1 transition-all flex-1 min-h-[3.25rem] min-w-0 py-2 px-1 rounded-xl active:scale-[0.98]"
+                style={{ color: isActive ? '#7c3aed' : '#9ca3af' }}
+              >
+                <tab.icon className="w-5 h-5 shrink-0" strokeWidth={isActive ? 2.5 : 1.8} />
+                <span className="text-[10px] font-semibold leading-tight text-center">
+                  {tab.label}
+                </span>
+              </button>
+            );
+          })}
         </div>
       </nav>
     </div>

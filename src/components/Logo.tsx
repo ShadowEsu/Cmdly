@@ -25,24 +25,25 @@ const Logo: React.FC<LogoProps> = ({ className = '', size = 'lg', showTagline = 
   const isCentered = !className.includes('text-left');
 
   return (
-    <div className={`flex flex-col flex-1 items-center justify-center p-8 ${className}`}>
-      <motion.div 
+    <div className={`flex flex-col flex-1 items-center justify-center p-6 ${className}`}>
+      <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
         animate={{ scale: 1, opacity: 1 }}
         className="inline-block"
       >
         <h1
-          className={`font-serif ${sizes[size]} text-primary font-semibold tracking-[0.12em] mb-3 uppercase`}
+          className={`font-sans ${sizes[size]} font-extrabold tracking-tight mb-2`}
+          style={{ color: '#7c3aed' }}
         >
-          Regrade
+          regrade
         </h1>
-        <div className={`h-px w-20 bg-primary/20 mx-auto ${showTagline ? 'mb-4' : ''}`} />
+        {showTagline && <div className={`h-0.5 w-12 rounded-full mx-auto mb-3`} style={{ background: 'linear-gradient(90deg, #7c3aed, #0d9488)' }} />}
       </motion.div>
       {showTagline && (
         <p
-          className={`text-on-surface-variant font-sans font-light opacity-60 ${taglineSizes[size]} uppercase tracking-[0.35em] text-center`}
+          className={`text-on-surface-variant font-sans font-medium opacity-70 ${taglineSizes[size]} text-center`}
         >
-          Secure Academic Advocacy Portal
+          Your grade appeal assistant
         </p>
       )}
     </div>

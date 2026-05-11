@@ -5,10 +5,14 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Crimson Pro", "system-ui", "serif"],
+        sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
+        serif: ["Crimson Pro", "ui-serif", "Georgia", "serif"],
         mono: ["JetBrains Mono", "ui-monospace", "monospace"],
       },
       colors: {
+        primary: { DEFAULT: '#7c3aed', light: '#ede9fe', dark: '#6d28d9' },
+        secondary: { DEFAULT: '#0d9488', light: '#ccfbf1', dark: '#0f766e' },
+        surface: '#faf9ff',
         vault: {
           bg: "var(--color-vault-bg)",
           fg: "var(--color-vault-fg)",
