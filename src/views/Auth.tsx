@@ -17,11 +17,32 @@ const Auth: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
 
+  const authMessageFromError = (err: unknown) => {
+    const anyErr = err as { code?: string; message?: string };
+    const code = anyErr?.code || '';
+
+    if (code === 'auth/invalid-email') return 'That email address is invalid. Double-check it and try again.';
+    if (code === 'auth/missing-email') return 'Please enter your email address first.';
+    if (code === 'auth/user-not-found')
+      return 'No account exists for that email yet. Create an account first, or use a different email.';
+    if (code === 'auth/wrong-password') return 'Incorrect password. Try again or use “Forgot password?”.';
+    if (code === 'auth/too-many-requests')
+      return 'Too many attempts. Wait a bit and try again, or reset your password.';
+    if (code === 'auth/operation-not-allowed')
+      return 'Firebase Auth isn’t enabled for this sign-in method yet. In Firebase Console → Authentication → Sign-in method, enable Email/Password (and/or Google).';
+    if (code === 'auth/unauthorized-domain')
+      return 'This hostname isn’t allowed for Firebase Auth yet. In Firebase Console → Authentication → Settings → Authorized domains, add your hostname (e.g. localhost or 127.0.0.1).';
+
+    return anyErr?.message || 'An authentication error occurred.';
+  };
+
   const handleGoogleLogin = async () => {
     setError(null);
+    setNotice(null);
     setLoading(true);
     try {
       await loginWithGoogle();
@@ -45,24 +66,31 @@ const Auth: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
+    setNotice(null);
     setLoading(true);
 
     try {
       if (forgotPassword) {
-        await sendPasswordResetEmail(auth, email);
-        setError("Password reset email sent. Check your inbox.");
+        const trimmedEmail = email.trim();
+        if (!trimmedEmail) {
+          setError('Please enter your email address first.');
+          return;
+        }
+        await sendPasswordResetEmail(auth, trimmedEmail);
+        setNotice('Password reset email sent. Check your inbox (and spam).');
         setForgotPassword(false);
       } else if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         await sendEmailVerification(cred.user);
-        setError("Account created! Please check your email and verify your address before signing in.");
+        setNotice('Account created! Please check your email and verify your address before signing in.');
         setIsLogin(true);
         return;
       }
     } catch (err: any) {
-      setError(err.message || "An authentication error occurred.");
+      console.error('Auth error:', err);
+      setError(authMessageFromError(err));
     } finally {
       setLoading(false);
     }
@@ -90,6 +118,17 @@ const Auth: React.FC = () => {
           </div>
 
           <AnimatePresence mode="wait">
+            {notice && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="mb-6 p-4 bg-emerald-50 border border-emerald-100 rounded-xl text-emerald-800 text-xs font-bold leading-relaxed flex items-start gap-3"
+              >
+                <ICONS.CheckCircle2 size={16} className="shrink-0" />
+                {notice}
+              </motion.div>
+            )}
             {error && (
               <motion.div 
                 initial={{ opacity: 0, height: 0 }}

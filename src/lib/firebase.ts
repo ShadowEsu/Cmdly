@@ -12,24 +12,49 @@ import {
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-function req(name: keyof ImportMetaEnv): string {
+function readEnv(name: keyof ImportMetaEnv): string | undefined {
   const v = import.meta.env[name];
-  if (typeof v !== 'string' || !String(v).trim()) {
-    throw new Error(
-      `Missing ${String(name)}. Copy .env.example to .env and set Firebase web config (see FIREBASE_SETUP.md).`,
-    );
-  }
-  return String(v).trim();
+  if (typeof v !== 'string') return undefined;
+  const trimmed = v.trim();
+  return trimmed ? trimmed : undefined;
+}
+
+function placeholder(name: string) {
+  return `missing-${name.toLowerCase()}`;
+}
+
+const requiredEnvKeys = [
+  'VITE_FIREBASE_API_KEY',
+  'VITE_FIREBASE_AUTH_DOMAIN',
+  'VITE_FIREBASE_PROJECT_ID',
+  'VITE_FIREBASE_STORAGE_BUCKET',
+  'VITE_FIREBASE_MESSAGING_SENDER_ID',
+  'VITE_FIREBASE_APP_ID',
+] as const satisfies ReadonlyArray<keyof ImportMetaEnv>;
+
+const missingKeys = requiredEnvKeys.filter((k) => !readEnv(k));
+
+/**
+ * True when Firebase is configured from `.env`.
+ * In dev, we allow the app to boot with placeholder values so the UI can load.
+ */
+export const firebaseReady = missingKeys.length === 0;
+if (!firebaseReady) {
+  console.warn(
+    `[Regrade] Firebase web config is missing (${missingKeys.join(
+      ', ',
+    )}). The app will start in limited mode. Copy .env.example to .env and set your Firebase keys.`,
+  );
 }
 
 const firebaseWeb: FirebaseOptions = {
-  apiKey: req('VITE_FIREBASE_API_KEY'),
-  authDomain: req('VITE_FIREBASE_AUTH_DOMAIN'),
-  projectId: req('VITE_FIREBASE_PROJECT_ID'),
-  storageBucket: req('VITE_FIREBASE_STORAGE_BUCKET'),
-  messagingSenderId: req('VITE_FIREBASE_MESSAGING_SENDER_ID'),
-  appId: req('VITE_FIREBASE_APP_ID'),
-  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID?.trim() || undefined,
+  apiKey: readEnv('VITE_FIREBASE_API_KEY') ?? placeholder('api-key'),
+  authDomain: readEnv('VITE_FIREBASE_AUTH_DOMAIN') ?? `${placeholder('auth')}.firebaseapp.com`,
+  projectId: readEnv('VITE_FIREBASE_PROJECT_ID') ?? placeholder('project-id'),
+  storageBucket: readEnv('VITE_FIREBASE_STORAGE_BUCKET') ?? `${placeholder('bucket')}.appspot.com`,
+  messagingSenderId: readEnv('VITE_FIREBASE_MESSAGING_SENDER_ID') ?? '0',
+  appId: readEnv('VITE_FIREBASE_APP_ID') ?? placeholder('app-id'),
+  measurementId: readEnv('VITE_FIREBASE_MEASUREMENT_ID') || undefined,
 };
 
 const firestoreDatabaseId =

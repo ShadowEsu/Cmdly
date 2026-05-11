@@ -175,7 +175,7 @@ If you prefer interactive setup, `firebase init` can merge with existing config�
 
 1. In Firebase Console → **Project settings** → **Service accounts** → **Generate new private key**. You get a JSON file. **Do not commit it.**
 2. In `server/`, create `.env` (see `server/.env.example`):
-   - `GEMINI_API_KEY` — from [Google AI Studio](https://aistudio.google.com/) (server only; never in Vite).
+   - `GEMINI_API_KEY` — from Google’s Gemini API key page (server only; never in Vite).
    - **Firebase Admin** (pick one) — needed so the API can **verify** ID tokens from signed-in users:
      - **`GOOGLE_APPLICATION_CREDENTIALS`** — path to the downloaded service account `.json` file, e.g. `GOOGLE_APPLICATION_CREDENTIALS=./firebase-adminsdk.json` (recommended for local dev), **or**
      - **`FIREBASE_SERVICE_ACCOUNT_JSON`** — the same JSON pasted as a **single line**.

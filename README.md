@@ -2,19 +2,20 @@
 <img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
 </div>
 
-# Run and deploy your AI Studio app
+# Regrade (web app)
 
-This contains everything you need to run your app locally.
-
-View your app in AI Studio: https://ai.studio/apps/85291b59-5238-4dc7-9ba9-eaeb6cc1c068
+Run Regrade locally (Vite + Firebase). AI features are served via the optional `server/` API.
 
 ## Run Locally
 
-**Prerequisites:**  Node.js
+**Prerequisites:** Node.js
 
 
 1. Install dependencies:
    `npm install`
-2. Copy **`.env.example`** to **`.env`** and set **`VITE_FIREBASE_*`** (see `FIREBASE_SETUP.md`). For AI features, add **`server/.env`** with **`GEMINI_API_KEY`** (never commit these files).
-3. Run the app:
+2. Copy **`.env.example`** to **`.env`** and set **`VITE_FIREBASE_*`** (see `FIREBASE_SETUP.md`).
+3. (Optional) Enable AI features:
+   - Create `server/.env` with `GEMINI_API_KEY` (server only; **never** in Vite / the browser).
+   - Start the API: `npm --prefix server install && npm --prefix server run dev`
+4. Run the app:
    `npm run dev`

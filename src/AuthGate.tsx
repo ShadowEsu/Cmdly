@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { auth } from './lib/firebase';
+import { auth, firebaseReady } from './lib/firebase';
 import Auth from './views/Auth';
 import { ICONS } from './constants';
 import { userService } from './services/userService';
@@ -14,6 +14,10 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (!firebaseReady) {
+      setLoading(false);
+      return;
+    }
     const unsub = onAuthStateChanged(auth, async (u) => {
       setUser(u);
       setLoading(false);
@@ -41,6 +45,12 @@ const AuthGate: React.FC<AuthGateProps> = ({ children }) => {
         </div>
       </div>
     );
+  }
+
+  if (!firebaseReady) {
+    // Allow the UI to boot without blocking on auth when Firebase isn't configured yet.
+    // A console warning is emitted from `src/lib/firebase.ts` with the missing keys.
+    return <>{children}</>;
   }
 
   if (!user) {
