@@ -9,21 +9,21 @@ import { scanContentForThreats } from '../lib/securityScanner';
 
 const Profile: React.FC = () => {
   const [user, setUser] = useState<User | null>(auth.currentUser);
-  const [profileData, setProfileData] = useState<Pick<UserProfile, 'name' | 'email' | 'major'>>({
+  const [profileData, setProfileData] = useState<UserProfile>({
     name: '',
     email: '',
     major: '',
+    pushNotificationsEnabled: false,
   });
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [scanning, setScanning] = useState(false);
   const [showSecurityToast, setShowSecurityToast] = useState(false);
-  const [securityError, setSecurityError] = useState<string | null>(null);
-  const [securityLogs, setSecurityLogs] = useState([
-    { event: 'Account authenticated', status: 'Passed', time: '2m ago' },
-    { event: 'Session established', status: 'Verified', time: '1m ago' },
-    { event: 'Connection secured', status: 'Active', time: 'Now' },
-  ]);
+  const [toastMessage, setToastMessage] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
+  const [togglingNotifications, setTogglingNotifications] = useState(false);
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (u) => {
@@ -36,6 +36,7 @@ const Profile: React.FC = () => {
               name: data.name || u.displayName || '',
               email: data.email || u.email || '',
               major: data.major || '',
+              pushNotificationsEnabled: data.pushNotificationsEnabled || false,
             });
           }
         } catch (err) {
@@ -52,46 +53,88 @@ const Profile: React.FC = () => {
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    
+
     setScanning(true);
-    setSecurityError(null);
+    setError(null);
 
     const fullContent = `${profileData.name} ${profileData.major}`;
     const scanResult = await scanContentForThreats(fullContent, 'profile');
 
     if (!scanResult.isSafe) {
-      setSecurityError(scanResult.recommendation || "Your input contains content that can't be saved. Please review and try again.");
-      setSecurityLogs(prev => [
-        { event: 'Suspicious input blocked', status: 'Blocked', time: 'Just now' },
-        ...prev.slice(0, 2)
-      ]);
+      setError(scanResult.recommendation || "Your input contains content that can't be saved. Please review and try again.");
       setScanning(false);
       return;
     }
-    
-    // Strict Input Filtering
+
     const sanitized = {
       name: sanitizeInput(profileData.name),
       major: sanitizeInput(profileData.major),
-      email: profileData.email,
+      email: sanitizeInput(profileData.email),
     };
 
     try {
+      // Update email in Firebase Auth if it changed
+      if (sanitized.email !== user.email) {
+        await userService.updateEmail(user.uid, sanitized.email);
+      }
+
+      // Update profile in Firestore
       await userService.syncProfile(user.uid, sanitized);
-      setProfileData(sanitized);
+      setProfileData(prev => ({ ...prev, ...sanitized }));
       setIsEditing(false);
+      setToastMessage('Settings saved successfully');
       setShowSecurityToast(true);
       setTimeout(() => setShowSecurityToast(false), 3000);
-      
-      setSecurityLogs(prev => [
-        { event: 'Security scan passed', status: 'Passed', time: 'Just now' },
-        { event: 'Profile updated', status: 'Success', time: 'Just now' },
-        ...prev.slice(0, 1)
-      ]);
-    } catch (err) {
-      console.error("Profile save failed", err);
+    } catch (err: any) {
+      const errorMsg = err.message?.includes('email-already-in-use')
+        ? 'This email is already in use'
+        : err.message || 'Failed to save settings';
+      setError(errorMsg);
+      console.error("Settings save failed", err);
     } finally {
       setScanning(false);
+    }
+  };
+
+  const handleTogglePushNotifications = async () => {
+    if (!user) return;
+
+    setTogglingNotifications(true);
+    setError(null);
+
+    try {
+      const newState = !profileData.pushNotificationsEnabled;
+      await userService.togglePushNotifications(user.uid, newState);
+      setProfileData(prev => ({ ...prev, pushNotificationsEnabled: newState }));
+      setToastMessage(newState ? 'Push notifications enabled' : 'Push notifications disabled');
+      setShowSecurityToast(true);
+      setTimeout(() => setShowSecurityToast(false), 3000);
+    } catch (err: any) {
+      setError(err.message || 'Failed to update notification settings');
+      console.error("Toggle notifications failed", err);
+    } finally {
+      setTogglingNotifications(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+
+    setDeletingAccount(true);
+    setError(null);
+
+    try {
+      await userService.deleteAccount(user.uid);
+      // Account deleted, user will be signed out automatically
+    } catch (err: any) {
+      const errorMsg = err.message?.includes('requires-recent-login')
+        ? 'For security, please sign in again before deleting your account'
+        : err.message || 'Failed to delete account';
+      setError(errorMsg);
+      console.error("Account deletion failed", err);
+      setShowDeleteConfirm(false);
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -199,12 +242,46 @@ const Profile: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-4">
-                   <button 
+                <section className="space-y-6 border-t border-primary/5 pt-12">
+                  <div className="space-y-4">
+                    <h3 className="font-bold uppercase tracking-[0.3em] text-[10px] text-primary/60">Notifications</h3>
+                    <div className="flex items-center justify-between p-6 rounded-2xl border border-primary/10 bg-primary/[0.02]">
+                      <div className="flex-1">
+                        <p className="text-sm font-semibold text-primary">Push Notifications</p>
+                        <p className="text-xs text-primary/50 mt-1">Receive updates about your appeals</p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleTogglePushNotifications}
+                        disabled={togglingNotifications}
+                        role="switch"
+                        aria-checked={profileData.pushNotificationsEnabled}
+                        className={`relative h-8 w-14 shrink-0 rounded-full ring-1 ring-primary/20 transition disabled:opacity-50 ${
+                          profileData.pushNotificationsEnabled ? 'bg-emerald-500/25' : 'bg-primary/10'
+                        }`}
+                      >
+                        <span
+                          className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow ring-1 ring-primary/20 transition ${
+                            profileData.pushNotificationsEnabled ? 'left-7' : 'left-1'
+                          }`}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </section>
+
+                <div className="flex flex-col gap-4 border-t border-primary/5 pt-12">
+                  <button
                     onClick={handleSignOut}
-                    className="px-10 py-5 rounded-2xl border border-red-500/20 text-red-500/40 font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-red-500 hover:text-white transition-all"
+                    className="px-10 py-5 rounded-2xl border border-primary/20 text-primary font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-primary/5 transition-all"
                   >
                     Sign Out
+                  </button>
+                  <button
+                    onClick={() => setShowDeleteConfirm(true)}
+                    className="px-10 py-5 rounded-2xl border border-red-500/20 text-red-500/60 font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-red-500/10 hover:text-red-500 transition-all"
+                  >
+                    Delete Account
                   </button>
                 </div>
               </motion.div>
@@ -219,7 +296,7 @@ const Profile: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
                   <div className="space-y-4">
                     <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-4">Legal Full Name</label>
-                    <input 
+                    <input
                       type="text"
                       required
                       value={profileData.name}
@@ -229,8 +306,19 @@ const Profile: React.FC = () => {
                   </div>
 
                   <div className="space-y-4">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-4">Email Address</label>
+                    <input
+                      type="email"
+                      required
+                      value={profileData.email}
+                      onChange={(e) => setProfileData({...profileData, email: e.target.value})}
+                      className="w-full bg-surface/50 border border-primary/10 rounded-[2rem] px-8 py-5 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 text-xl font-serif italic"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
                     <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-4">Major / Course Field</label>
-                    <input 
+                    <input
                       type="text"
                       required
                       value={profileData.major}
@@ -239,6 +327,13 @@ const Profile: React.FC = () => {
                     />
                   </div>
                 </div>
+
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-medium flex items-start gap-3">
+                    <ICONS.AlertCircle size={18} className="shrink-0 mt-0.5" />
+                    <span>{error}</span>
+                  </div>
+                )}
 
                 <div className="flex gap-6 pt-12 border-t border-primary/5">
                   <button 
@@ -295,7 +390,7 @@ const Profile: React.FC = () => {
 
       <AnimatePresence>
         {showSecurityToast && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 50 }}
@@ -303,8 +398,71 @@ const Profile: React.FC = () => {
           >
             <div className="bg-primary text-white rounded-2xl p-4 inline-flex items-center gap-3 shadow-2xl border border-white/20">
               <ICONS.Check size={20} />
-              <p className="text-sm font-medium">Profile updated successfully</p>
+              <p className="text-sm font-medium">{toastMessage}</p>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showDeleteConfirm && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/40 z-[100] flex items-center justify-center p-4"
+            onClick={() => !deletingAccount && setShowDeleteConfirm(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-white rounded-3xl p-8 max-w-md w-full shadow-2xl"
+            >
+              <div className="space-y-6">
+                <div className="flex gap-4">
+                  <div className="bg-red-100 rounded-full p-3 shrink-0">
+                    <ICONS.AlertTriangle size={24} className="text-red-600" />
+                  </div>
+                  <div className="flex-1">
+                    <h3 className="font-bold text-lg text-primary mb-2">Delete Account?</h3>
+                    <p className="text-sm text-primary/60">This action cannot be undone. All your appeals, documents, and account data will be permanently deleted.</p>
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-red-600 text-sm font-medium flex items-start gap-3">
+                    <ICONS.AlertCircle size={18} className="shrink-0 mt-0.5" />
+                    <span>{error}</span>
+                  </div>
+                )}
+
+                <div className="flex gap-4">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={deletingAccount}
+                    className="flex-1 py-3 rounded-xl border border-primary/20 text-primary font-bold uppercase tracking-wider text-xs hover:bg-primary/5 transition-all disabled:opacity-50"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deletingAccount}
+                    className="flex-1 py-3 rounded-xl bg-red-500 text-white font-bold uppercase tracking-wider text-xs hover:bg-red-600 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                  >
+                    {deletingAccount ? (
+                      <>
+                        <ICONS.RefreshCcw size={16} className="animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      'Delete Account'
+                    )}
+                  </button>
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

@@ -9,6 +9,8 @@ import {
   signOut,
   sendEmailVerification,
   sendPasswordResetEmail,
+  deleteUser,
+  updateEmail,
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -46,6 +48,8 @@ export {
   signOut,
   sendEmailVerification,
   sendPasswordResetEmail,
+  deleteUser,
+  updateEmail,
 };
 
 export enum OperationType {
