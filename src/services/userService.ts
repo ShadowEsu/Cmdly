@@ -25,6 +25,7 @@ export const userService = {
         const newProfile = {
           name: profile.name || 'Anonymous Student',
           email: profile.email || '',
+          studentId: '',
           major: profile.major ?? 'Undeclared',
           avatarUrl: profile.avatarUrl || '',
           createdAt: serverTimestamp(),
