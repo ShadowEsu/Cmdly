@@ -1,3 +1,4 @@
+import type { AnalysisResult } from '../types';
 import { apiFetch } from './api';
 
 export { ANALYTICAL_SYSTEM_PROMPT } from '../../shared/analyticalSystemPrompt';
@@ -20,7 +21,7 @@ export async function performComprehensiveAnalysis(
   rubricData: string,
   feedbackData: string,
   options?: { inlineImages?: InlineImagePart[] },
-) {
+): Promise<AnalysisResult> {
   try {
     const res = await apiFetch('/v1/gemini/analyze', {
       method: 'POST',
@@ -34,7 +35,7 @@ export async function performComprehensiveAnalysis(
     if (!res.ok) {
       throw new Error(await readApiError(res));
     }
-    return res.json() as Promise<Record<string, unknown>>;
+    return res.json() as Promise<AnalysisResult>;
   } catch (error) {
     console.error('Gemini Analysis Error:', error);
     const hint = error instanceof Error && error.message ? ` (${error.message})` : '';

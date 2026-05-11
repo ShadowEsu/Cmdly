@@ -1,10 +1,10 @@
-import {Component, StrictMode, type ReactNode} from 'react';
+import React, {StrictMode, type ReactNode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import AuthGate from './AuthGate.tsx';
 import './index.css';
 
-class BootErrorBoundary extends Component<{children: ReactNode}, {error: Error | null}> {
+class BootErrorBoundary extends React.Component<{children: ReactNode}, {error: Error | null}> {
   state: {error: Error | null} = {error: null};
 
   static getDerivedStateFromError(error: Error) {
@@ -30,7 +30,7 @@ class BootErrorBoundary extends Component<{children: ReactNode}, {error: Error |
         </div>
       );
     }
-    return this.props.children;
+    return (this as React.Component<{children: ReactNode}>).props.children;
   }
 }
 

@@ -3,5 +3,17 @@
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.app.tsbuildinfo"
   },
   "extends": "./tsconfig.json",
-  "include": ["src"]
+  "include": ["src"],
+  "exclude": [
+    "src/pages",
+    "src/components/BottomNav.tsx",
+    "src/components/CommandConstellation.tsx",
+    "src/components/CommandDetailSheet.tsx",
+    "src/components/CommandRow.tsx",
+    "src/components/GlowSearch.tsx",
+    "src/components/PlatformRail.tsx",
+    "src/context/CollectionsContext.tsx",
+    "src/data/commands.ts",
+    "src/data/platforms.ts"
+  ]
 }

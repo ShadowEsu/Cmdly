@@ -9,7 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "clean": "rm -rf dist",
-    "lint": "tsc --noEmit",
+    "lint": "tsc --noEmit -p tsconfig.app.json",
     "deploy:hosting": "npm run build && firebase deploy --only hosting:regrade",
     "deploy:rules": "firebase deploy --only firestore:rules"
   },

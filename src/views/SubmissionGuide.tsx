@@ -112,7 +112,7 @@ const platformInfo: Record<Exclude<Platform, null>, {
         description: 'If your teacher denies the appeal, escalate to your department chair or school administration.'
       }
     ],
-    deadline: 'Check your school's deadline policy (typically 10–30 days from the grade posting date).'
+    deadline: "Check your school's deadline policy (typically 10–30 days from the grade posting date)."
   },
   d2l: {
     name: 'D2L Brightspace',
@@ -141,7 +141,7 @@ const platformInfo: Record<Exclude<Platform, null>, {
       {
         step: 1,
         title: 'Appeal Through Your LMS First',
-        description: 'Turnitin grades are submitted through Canvas, Moodle, or Blackboard. Appeal through your school's LMS platform instead.'
+        description: "Turnitin grades are submitted through Canvas, Moodle, or Blackboard. Appeal through your school's LMS platform instead."
       },
       {
         step: 2,
@@ -154,7 +154,7 @@ const platformInfo: Record<Exclude<Platform, null>, {
         description: 'If no response, contact your department chair or academic dean with documentation.'
       }
     ],
-    deadline: 'Follow your institution's standard appeal timeline (usually 10–30 days).'
+    deadline: "Follow your institution's standard appeal timeline (usually 10–30 days)."
   },
   unsure: {
     name: 'Not Sure / Other Platform',
@@ -167,7 +167,7 @@ const platformInfo: Record<Exclude<Platform, null>, {
       {
         step: 2,
         title: 'Escalate to Department Chair',
-        description: 'If your professor denies the appeal or doesn't respond within 5–7 days, contact the department chair. Include copies of your correspondence with the professor.'
+        description: "If your professor denies the appeal or doesn't respond within 5–7 days, contact the department chair. Include copies of your correspondence with the professor."
       },
       {
         step: 3,
@@ -175,7 +175,7 @@ const platformInfo: Record<Exclude<Platform, null>, {
         description: 'If the department chair cannot resolve it, appeal to the dean of academic affairs or student ombudsman. Provide all documentation.'
       }
     ],
-    deadline: 'Check your school's student handbook or registrar office for appeal deadlines (typically 10–30 days from grade posting).'
+    deadline: "Check your school's student handbook or registrar office for appeal deadlines (typically 10–30 days from grade posting)."
   }
 };
 
