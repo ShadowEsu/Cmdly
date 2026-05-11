@@ -78,9 +78,9 @@ const Auth: React.FC = () => {
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-md"
       >
-        <div className="text-center mb-16">
-          <Logo size="xl" className="mb-6" />
-          <h2 className="font-serif text-5xl text-primary/80 font-light tracking-tight mb-4">Sign in to Regrade</h2>
+        <div className="text-center mb-8">
+          <Logo size="xl" className="mb-4" />
+          <h2 className="font-serif text-4xl sm:text-5xl text-primary/80 font-light tracking-tight mb-3">Sign in to Regrade</h2>
           <p className="text-on-surface-variant font-bold opacity-50 text-sm uppercase tracking-[0.6em]">Your personal grade appeal assistant</p>
         </div>
 
@@ -109,12 +109,14 @@ const Auth: React.FC = () => {
                 <label className="text-[10px] font-bold uppercase tracking-widest text-primary opacity-60 mb-2 block">Email address</label>
                 <div className="relative">
                   <ICONS.User size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors" />
-                  <input 
+                  <input
                     type="email"
                     required
+                    autoComplete="email"
+                    inputMode="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full bg-surface/50 border border-primary/5 rounded-xl pl-12 pr-4 py-4 outline-none focus:ring-1 focus:ring-primary transition-all text-sm font-sans"
+                    className="w-full bg-surface/50 border border-primary/5 rounded-xl pl-12 pr-4 py-4 outline-none focus:ring-1 focus:ring-primary transition-all text-base font-sans"
                     placeholder="student@university.edu"
                   />
                 </div>
@@ -127,19 +129,20 @@ const Auth: React.FC = () => {
                     <button
                       type="button"
                       onClick={() => setForgotPassword(true)}
-                      className="text-[10px] font-bold uppercase tracking-widest text-primary/40 hover:text-primary transition-colors"
+                      className="min-h-[44px] flex items-center text-[10px] font-bold uppercase tracking-widest text-primary/40 hover:text-primary transition-colors px-1"
                     >
                       Forgot password?
                     </button>
                   </div>
                   <div className="relative">
                     <ICONS.Lock size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary/40 group-focus-within:text-primary transition-colors" />
-                    <input 
+                    <input
                       type="password"
                       required={!forgotPassword}
+                      autoComplete={isLogin ? 'current-password' : 'new-password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="w-full bg-surface/50 border border-primary/5 rounded-xl pl-12 pr-12 py-4 outline-none focus:ring-1 focus:ring-primary transition-all text-sm font-sans"
+                      className="w-full bg-surface/50 border border-primary/5 rounded-xl pl-12 pr-12 py-4 outline-none focus:ring-1 focus:ring-primary transition-all text-base font-sans"
                       placeholder="••••••••"
                     />
                   </div>

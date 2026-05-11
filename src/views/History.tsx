@@ -22,7 +22,7 @@ export default function History() {
   }, []);
 
   return (
-    <div className="space-y-16 max-w-5xl mx-auto">
+    <div className="space-y-8 md:space-y-12 max-w-5xl mx-auto">
       <header className="flex items-end justify-between border-b border-primary/5 pb-8">
         <div>
           <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/30 block mb-2">My Appeals</span>
@@ -47,7 +47,7 @@ export default function History() {
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: idx * 0.1 }}
-              className="group flex flex-col md:flex-row items-start md:items-center gap-8 glass-panel p-8 rounded-[2rem] hover:bg-white transition-all cursor-pointer border border-primary/5"
+              className="group flex flex-col md:flex-row items-start md:items-center gap-5 md:gap-8 glass-panel p-5 md:p-8 rounded-2xl md:rounded-[2rem] hover:bg-white transition-all cursor-pointer border border-primary/5"
             >
               <div className="bg-primary/5 p-6 rounded-2xl text-primary/40 group-hover:text-primary transition-colors">
                  <ICONS.FileText size={28} strokeWidth={1} />
@@ -81,7 +81,7 @@ export default function History() {
         )}
       </div>
 
-      <div className="glass-panel p-12 rounded-[3rem] text-center bg-primary/5 border border-primary/5 border-dashed">
+      <div className="glass-panel p-8 rounded-2xl md:rounded-[2.5rem] text-center bg-primary/5 border border-primary/5 border-dashed">
          <div className="flex justify-center mb-6 text-primary/20">
            <ICONS.Shield size={48} strokeWidth={0.5} />
          </div>

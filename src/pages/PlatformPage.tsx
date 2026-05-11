@@ -45,7 +45,7 @@ export function PlatformPage() {
           <button
             type="button"
             onClick={() => nav(-1)}
-            className="rounded-xl bg-white/10 p-2 ring-1 ring-white/15 hover:bg-white/15"
+            className="rounded-xl bg-white/10 p-2.5 ring-1 ring-white/15 hover:bg-white/15 min-w-[44px] min-h-[44px] flex items-center justify-center"
             aria-label="Go back"
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" className="text-zinc-100" aria-hidden>
@@ -65,7 +65,7 @@ export function PlatformPage() {
           <button
             type="button"
             onClick={() => nav(`/platform/${prev.id}`)}
-            className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-zinc-100 ring-1 ring-white/15 hover:bg-white/15"
+            className="rounded-xl bg-white/10 px-3 py-2.5 text-xs font-semibold text-zinc-100 ring-1 ring-white/15 hover:bg-white/15 min-h-[44px] flex items-center"
           >
             ← {prev.label}
           </button>
@@ -81,7 +81,7 @@ export function PlatformPage() {
           <button
             type="button"
             onClick={() => nav(`/platform/${next.id}`)}
-            className="rounded-xl bg-white/10 px-3 py-2 text-xs font-semibold text-zinc-100 ring-1 ring-white/15 hover:bg-white/15"
+            className="rounded-xl bg-white/10 px-3 py-2.5 text-xs font-semibold text-zinc-100 ring-1 ring-white/15 hover:bg-white/15 min-h-[44px] flex items-center"
           >
             {next.label} →
           </button>

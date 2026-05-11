@@ -74,7 +74,7 @@ export default function Advocate({ onBack }: { onBack: () => void }) {
         </div>
         <div className="flex gap-3">
            {[ICONS.Shield, ICONS.Download].map((Icon, i) => (
-             <button key={i} className="p-3 bg-white/50 text-primary/30 hover:text-primary transition-all rounded-xl border border-primary/5">
+             <button key={i} className="min-w-[44px] min-h-[44px] flex items-center justify-center p-3 bg-white/50 text-primary/30 hover:text-primary transition-all rounded-xl border border-primary/5">
                 <Icon size={18} />
              </button>
            ))}

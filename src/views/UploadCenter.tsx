@@ -334,7 +334,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
             <button
               type="button"
               onClick={() => setShowAdvocate(true)}
-              className="self-start sm:self-auto text-[11px] font-bold uppercase tracking-widest text-primary/45 hover:text-primary border border-primary/10 rounded-xl px-4 py-2.5 transition-colors"
+              className="self-start sm:self-auto min-h-[44px] flex items-center text-[11px] font-bold uppercase tracking-widest text-primary/45 hover:text-primary border border-primary/10 rounded-xl px-4 py-2.5 transition-colors"
             >
               Questions? Chat
             </button>
@@ -580,7 +580,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
                     <button
                       type="button"
                       onClick={() => removeFile(u.id)}
-                      className="text-[10px] font-bold uppercase text-red-600 hover:underline shrink-0"
+                      className="min-h-[44px] min-w-[44px] flex items-center justify-center text-[10px] font-bold uppercase text-red-600 hover:underline shrink-0 px-2"
                     >
                       Remove
                     </button>
@@ -755,10 +755,10 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           </div>
         </div>
 
-        <motion.div 
+        <motion.div
           whileHover={{ scale: 1.02 }}
           onClick={() => setShowAdvocate(true)}
-          className="glass-panel rounded-2xl overflow-hidden aspect-[4/3] relative group cursor-pointer"
+          className="hidden lg:block glass-panel rounded-2xl overflow-hidden aspect-[4/3] relative group cursor-pointer"
         >
           <img 
             src="https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&q=80&w=800" 

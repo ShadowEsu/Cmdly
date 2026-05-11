@@ -33,9 +33,9 @@ export default function Dashboard({
   }, []);
 
   return (
-    <div className="space-y-32 max-w-7xl mx-auto py-12">
+    <div className="space-y-12 md:space-y-24 max-w-7xl mx-auto py-6 md:py-12">
       <section className="relative text-left">
-        <div className="max-w-4xl mb-20 space-y-10">
+        <div className="max-w-4xl mb-8 md:mb-16 space-y-6 md:space-y-10">
           <div className="flex items-center gap-6">
             <div className="h-px bg-primary/20 w-12" />
             <span className="text-[12px] sm:text-sm font-light tracking-[0.45em] text-primary opacity-45 uppercase">
@@ -46,7 +46,7 @@ export default function Dashboard({
           <motion.h1
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            className="font-serif text-5xl md:text-7xl lg:text-8xl text-primary font-light leading-[1.08] tracking-tight -ml-1"
+            className="font-serif text-4xl md:text-7xl lg:text-8xl text-primary font-light leading-[1.08] tracking-tight -ml-1"
           >
             Welcome, <span className="font-light italic text-primary/60">{firstName}</span>.
           </motion.h1>
@@ -66,36 +66,37 @@ export default function Dashboard({
           whileHover={{ y: -4 }}
           whileTap={{ scale: 0.98 }}
           onClick={onStartAppeal}
-          className="w-full bg-primary text-white p-10 md:p-14 rounded-[3rem] shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-10 group relative overflow-hidden transition-all border border-white/10"
+          className="w-full bg-primary text-white p-6 sm:p-10 md:p-14 rounded-2xl sm:rounded-[2.5rem] md:rounded-[3rem] shadow-2xl flex flex-col xl:flex-row items-center justify-between gap-6 md:gap-10 group relative overflow-hidden transition-all border border-white/10 min-h-[44px]"
         >
           <div className="absolute inset-0 paper-texture opacity-10 mix-blend-overlay pointer-events-none" />
           <div className="absolute top-0 right-0 w-[60%] h-full bg-gradient-to-l from-white/10 to-transparent pointer-events-none" />
 
-          <div className="flex items-center gap-10 relative z-10 text-left">
-            <div className="p-6 bg-white/10 rounded-3xl border border-white/20 backdrop-blur-xl shadow-xl group-hover:scale-110 transition-transform">
-              <ICONS.Plus size={48} strokeWidth={2} className="text-white" />
+          <div className="flex items-center gap-5 md:gap-10 relative z-10 text-left">
+            <div className="p-3 sm:p-5 md:p-6 bg-white/10 rounded-2xl sm:rounded-3xl border border-white/20 backdrop-blur-xl shadow-xl group-hover:scale-110 transition-transform shrink-0">
+              <ICONS.Plus size={32} strokeWidth={2} className="text-white sm:hidden" />
+              <ICONS.Plus size={48} strokeWidth={2} className="text-white hidden sm:block" />
             </div>
-            <div className="space-y-3">
-              <h2 className="text-4xl md:text-5xl font-serif font-light tracking-tight leading-tight">Start New Appeal</h2>
-              <p className="text-white/60 font-serif italic text-lg md:text-xl max-w-lg leading-relaxed">Upload your graded assignment and let Regrade analyze your case.</p>
+            <div className="space-y-2 sm:space-y-3">
+              <h2 className="text-2xl sm:text-4xl md:text-5xl font-serif font-light tracking-tight leading-tight">Start New Appeal</h2>
+              <p className="text-white/60 font-serif italic text-sm sm:text-lg md:text-xl max-w-lg leading-relaxed">Upload your graded assignment and let Regrade analyze your case.</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6 relative z-10 bg-white text-primary px-10 py-5 rounded-full group-hover:bg-white/90 transition-all shadow-xl hover:scale-105">
+          <div className="flex items-center gap-3 sm:gap-6 relative z-10 bg-white text-primary px-6 sm:px-10 py-3 sm:py-5 rounded-full group-hover:bg-white/90 transition-all shadow-xl hover:scale-105 shrink-0">
             <span className="font-light uppercase tracking-[0.28em] text-xs">Get started</span>
-            <ICONS.ArrowRight className="group-hover:translate-x-2 transition-transform w-5 h-5" />
+            <ICONS.ArrowRight className="group-hover:translate-x-2 transition-transform w-4 h-4 sm:w-5 sm:h-5" />
           </div>
         </motion.button>
       </section>
 
-      <div className="grid grid-cols-1 gap-10 lg:gap-12">
-        <motion.div className="glass-panel rounded-[3rem] overflow-hidden flex flex-col md:flex-row h-full border border-primary/10 bg-white shadow-xl">
-          <div className="md:w-2/5 h-64 md:h-auto overflow-hidden relative">
+      <div className="grid grid-cols-1 gap-6 md:gap-10 lg:gap-12">
+        <motion.div className="glass-panel rounded-2xl md:rounded-[3rem] overflow-hidden flex flex-col md:flex-row h-full border border-primary/10 bg-white shadow-xl">
+          <div className="md:w-2/5 h-32 md:h-auto overflow-hidden relative">
             <div className="absolute inset-0 bg-primary/5 flex items-center justify-center">
               <ICONS.FileText size={80} className="text-primary/10" />
             </div>
           </div>
-          <div className="md:w-3/5 p-12 flex flex-col justify-between space-y-8">
+          <div className="md:w-3/5 p-6 md:p-10 flex flex-col justify-between space-y-6 md:space-y-8">
             <div className="space-y-6">
               <div className="flex justify-between items-center">
                 <span className="text-[11px] font-light uppercase tracking-[0.22em] text-[#006c49] bg-green-500/10 px-4 py-1.5 rounded-full border border-green-500/20">
@@ -142,7 +143,7 @@ export default function Dashboard({
         </motion.div>
       </div>
 
-      <section className="pb-20 max-w-2xl">
+      <section className="pb-8 md:pb-20 max-w-2xl">
         <button
           type="button"
           onClick={onOpenChat}

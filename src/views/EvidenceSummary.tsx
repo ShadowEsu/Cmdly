@@ -7,24 +7,37 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
   const [tone, setTone] = useState(50);
   const [isSignOpen, setIsSignOpen] = useState(false);
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (caseId) {
+      setLoading(true);
       caseService.getCaseById(caseId).then(data => {
         if (data) setCurrentCase(data);
-      });
+      }).finally(() => setLoading(false));
+    } else {
+      setLoading(false);
     }
   }, [caseId]);
 
+  if (loading) {
+    return (
+      <div className="flex flex-col items-center justify-center py-24 gap-4 text-primary/40">
+        <ICONS.AILogo className="animate-spin" size={32} />
+        <p className="text-xs font-bold uppercase tracking-widest">Loading your case…</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-24 max-w-7xl mx-auto">
+    <div className="space-y-10 md:space-y-16 max-w-7xl mx-auto">
       {/* Evidence Bento Section */}
       <section className="space-y-10">
         <div className="flex items-center gap-6">
           <div className="flex-1 h-px bg-primary/10" />
           <div className="text-center">
             <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/40 block mb-3">Analysis Summary</span>
-            <h2 className="font-serif text-5xl md:text-6xl text-primary font-light tracking-tight">Your Case</h2>
+            <h2 className="font-serif text-4xl md:text-5xl text-primary font-light tracking-tight">Your Case</h2>
           </div>
           <div className="flex-1 h-px bg-primary/10" />
         </div>
@@ -33,7 +46,7 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            className="glass-panel rounded-[2.5rem] p-10 md:p-12 border border-primary/10 bg-white space-y-8"
+            className="glass-panel rounded-2xl md:rounded-[2.5rem] p-6 md:p-10 border border-primary/10 bg-white space-y-6 md:space-y-8"
           >
             <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
               <div>
@@ -106,7 +119,7 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
           </motion.div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {[
             {
               icon: ICONS.Check,
@@ -140,7 +153,7 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
             <motion.div 
               key={idx}
               whileHover={{ y: -12, scale: 1.02 }}
-              className="glass-panel p-12 rounded-[3.5rem] flex flex-col gap-10 transition-all duration-500 hover:shadow-huge bg-white border-2 border-primary/5"
+              className="glass-panel p-6 sm:p-8 md:p-10 rounded-2xl sm:rounded-[2.5rem] flex flex-col gap-6 md:gap-8 transition-all duration-500 hover:shadow-huge bg-white border-2 border-primary/5"
             >
               <div className="flex justify-between items-start">
                 <div className={`p-4 rounded-2xl ${item.color} shadow-sm`}>
@@ -160,13 +173,13 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
       </section>
 
       {/* Main Content Area */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-24">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16">
         {/* Sidebar Controls */}
-        <div className="lg:col-span-4 space-y-24">
-          <div className="glass-panel p-12 rounded-[3.5rem] space-y-12 bg-primary/[0.02] border-2 border-primary/5 shadow-huge">
+        <div className="lg:col-span-4 space-y-8 md:space-y-16">
+          <div className="glass-panel p-6 sm:p-8 rounded-2xl sm:rounded-[2.5rem] space-y-8 bg-primary/[0.02] border-2 border-primary/5 shadow-huge">
             <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary leading-none">Letter Tone</h4>
             
-            <div className="space-y-12 relative px-2">
+            <div className="space-y-8 relative px-2">
               <div className="h-[4px] bg-primary/10 rounded-full w-full relative">
                  <motion.div 
                    animate={{ left: `${tone}%` }}
@@ -191,9 +204,9 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
             </p>
           </div>
 
-          <div className="space-y-12 pl-12">
+          <div className="space-y-6 pl-8 sm:pl-12">
             <h4 className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/30 leading-none">Review Pipeline Milestone</h4>
-            <div className="space-y-16 relative">
+            <div className="space-y-8 md:space-y-12 relative">
               <div className="absolute left-[-32px] top-4 bottom-4 w-[2px] bg-primary/5" />
               {[
                 { step: 1, title: 'Review the Analysis', desc: 'Check the findings and confirm they match what happened.', active: true },
@@ -219,11 +232,11 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
           <motion.div 
             initial={{ opacity: 0, y: 50 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-[#fdfcf7] shadow-huge rounded-sm p-16 md:p-32 min-h-[1200px] w-full border border-primary/5 flex flex-col relative transition-all"
+            className="bg-[#fdfcf7] shadow-huge rounded-sm p-6 sm:p-10 md:p-20 min-h-[500px] md:min-h-[900px] w-full border border-primary/5 flex flex-col relative transition-all"
           >
             <div className="absolute inset-0 paper-texture opacity-40 pointer-events-none" />
             
-            <header className="border-b-2 border-primary/10 pb-16 mb-16 flex justify-between items-start relative z-10">
+            <header className="border-b-2 border-primary/10 pb-6 sm:pb-10 mb-6 sm:mb-10 flex justify-between items-start relative z-10">
               <div className="space-y-4">
                 {[
                   { label: 'TO:', val: 'Professor / Academic Review Committee' },
@@ -242,8 +255,8 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
               </div>
             </header>
 
-            <div className="flex-grow font-serif text-xl text-primary/80 space-y-8 leading-relaxed text-justify relative z-10">
-              <p className="text-2xl font-medium italic mb-10 text-primary tracking-tight">Dear Professor / Review Committee,</p>
+            <div className="flex-grow font-serif text-base sm:text-xl text-primary/80 space-y-6 sm:space-y-8 leading-relaxed text-justify relative z-10">
+              <p className="text-xl sm:text-2xl font-medium italic mb-6 sm:mb-10 text-primary tracking-tight">Dear Professor / Review Committee,</p>
 
               <p>
                 I am writing to formally request a reconsideration of the grade I received on{' '}
@@ -269,13 +282,13 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
                 I appreciate your time and I am open to a conversation about this. I am not disputing the grading lightly — I simply want to make sure the evaluation reflects my actual work.
               </p>
 
-              <div className="pt-16 space-y-2">
+              <div className="pt-8 sm:pt-12 space-y-2">
                 <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/30 ml-1">Signed</p>
-                <p className="font-serif italic text-4xl font-light text-primary/95">Your Name</p>
+                <p className="font-serif italic text-3xl sm:text-4xl font-light text-primary/95">Your Name</p>
               </div>
             </div>
 
-            <footer className="mt-16 pt-8 border-t border-primary/5 flex justify-between items-center opacity-30 relative z-10">
+            <footer className="mt-8 sm:mt-12 pt-6 border-t border-primary/5 flex justify-between items-center opacity-30 relative z-10">
               <p className="text-[9px] font-bold tracking-[0.4em] uppercase text-primary">Generated by Regrade</p>
               <p className="text-[9px] text-primary/40 font-mono">{new Date().toLocaleDateString()}</p>
             </footer>
@@ -284,29 +297,29 @@ export default function EvidenceSummary({ caseId, onFinalize }: { caseId: string
       </div>
 
       {/* Persistent Action Bar */}
-      <div className="sticky bottom-16 left-0 right-0 z-50 flex justify-center px-4">
-        <motion.div 
+      <div className="sticky bottom-16 left-0 right-0 z-50 flex justify-center px-3 sm:px-4">
+        <motion.div
           initial={{ y: 150, opacity: 0 }}
           animate={{ y: 0, opacity: 1 }}
-          className="glass-panel max-w-5xl w-full rounded-[3rem] py-8 px-16 flex flex-col md:flex-row justify-between items-center gap-10 shadow-huge bg-[#001438] text-white border-2 border-white/10"
+          className="glass-panel max-w-5xl w-full rounded-2xl sm:rounded-[2.5rem] py-4 sm:py-6 px-4 sm:px-8 flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6 shadow-huge bg-[#001438] text-white border-2 border-white/10"
         >
-          <div className="flex items-center gap-10">
+          <div className="flex items-center gap-6 w-full md:w-auto">
              <div className="flex flex-col">
                <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40 leading-none mb-1">Status</span>
                <span className="text-xs font-bold tracking-[0.2em] uppercase text-[#6cf8bb]">Appeal Letter Ready</span>
              </div>
-             <div className="h-12 w-px bg-white/10 hidden md:block" />
+             <div className="h-10 w-px bg-white/10 hidden md:block" />
           </div>
-          <div className="flex gap-4 sm:gap-6 w-full md:w-auto">
-             <button type="button" className="flex-1 md:flex-none flex items-center justify-center gap-3 min-h-[3.25rem] px-6 sm:px-10 py-4 rounded-2xl border border-white/10 hover:bg-white/5 transition-all text-[11px] font-bold uppercase tracking-[0.25em] text-white/70">
-               <ICONS.Download size={22} /> Download PDF
+          <div className="flex gap-3 sm:gap-4 w-full md:w-auto">
+             <button type="button" className="flex-1 md:flex-none flex items-center justify-center gap-2 min-h-[3rem] px-4 sm:px-6 py-3 rounded-xl sm:rounded-2xl border border-white/10 hover:bg-white/5 transition-all text-[11px] font-bold uppercase tracking-[0.2em] text-white/70">
+               <ICONS.Download size={18} /> Download
              </button>
-             <button 
+             <button
                type="button"
                onClick={onFinalize}
-               className="flex-1 md:flex-none flex items-center justify-center gap-3 min-h-[3.25rem] px-8 sm:px-12 py-4 rounded-2xl bg-primary text-white hover:shadow-[0_0_30px_rgba(0,35,111,0.5)] transition-all text-[11px] font-bold uppercase tracking-[0.25em] shadow-xl border border-white/20 active:scale-[0.98]"
+               className="flex-1 md:flex-none flex items-center justify-center gap-2 min-h-[3rem] px-4 sm:px-8 py-3 rounded-xl sm:rounded-2xl bg-primary text-white hover:shadow-[0_0_30px_rgba(0,35,111,0.5)] transition-all text-[11px] font-bold uppercase tracking-[0.2em] shadow-xl border border-white/20 active:scale-[0.98]"
              >
-               View Full Report <ICONS.ArrowRight size={22} />
+               View Report <ICONS.ArrowRight size={18} />
              </button>
           </div>
         </motion.div>

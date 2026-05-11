@@ -7,7 +7,7 @@ export function SettingsPage() {
   const accents: Accent[] = ["violet", "cyan", "amber"];
 
   const chipBase =
-    "flex-1 rounded-xl px-3 py-2 text-xs font-semibold ring-1 transition ring-vault-border";
+    "flex-1 rounded-xl px-3 py-3 text-xs font-semibold ring-1 transition ring-vault-border min-h-[44px] flex items-center justify-center";
   const chipOn = "bg-vault-muted/15 text-vault-fg";
   const chipOff = "bg-vault-surface text-vault-muted hover:bg-vault-pill-bg";
 

@@ -124,23 +124,24 @@ const Profile: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto space-y-24 pb-48 px-6 lg:px-12">
+    <div className="max-w-6xl mx-auto space-y-10 md:space-y-16 pb-24 md:pb-32 px-4 sm:px-6 lg:px-12">
       {/* Profile/Settings Header */}
-      <section className="relative pt-32 pb-24 border-b border-primary/10">
-        <div className="flex flex-col lg:flex-row gap-16 items-center lg:items-end">
+      <section className="relative pt-8 md:pt-16 pb-8 md:pb-12 border-b border-primary/10">
+        <div className="flex flex-col lg:flex-row gap-8 md:gap-12 items-center lg:items-end">
           <div className="relative group">
-            <div className="w-56 h-56 rounded-[3.5rem] bg-white border-2 border-primary/10 p-2 overflow-hidden relative z-10 transition-all duration-700 shadow-huge">
+            <div className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 rounded-3xl md:rounded-[3.5rem] bg-white border-2 border-primary/10 p-1.5 overflow-hidden relative z-10 transition-all duration-700 shadow-huge">
               <img
                 src={user.photoURL || DEFAULT_AVATAR_SRC}
                 alt=""
-                className="w-full h-full rounded-[3rem] object-cover"
+                className="w-full h-full rounded-2xl md:rounded-[3rem] object-cover"
               />
             </div>
             <div className="absolute inset-0 bg-primary/10 blur-[100px] rounded-full scale-150 opacity-20 -z-0"></div>
-            <button 
-              className="absolute -bottom-4 -right-4 bg-primary text-white p-5 rounded-3xl shadow-huge z-20 hover:scale-110 transition-transform border-4 border-surface"
+            <button
+              className="absolute -bottom-3 -right-3 bg-primary text-white p-3 sm:p-4 rounded-2xl shadow-huge z-20 hover:scale-110 transition-transform border-4 border-surface min-w-[44px] min-h-[44px] flex items-center justify-center"
+              aria-label="Change profile photo"
             >
-              <ICONS.Camera size={24} />
+              <ICONS.Camera size={20} />
             </button>
           </div>
           
@@ -149,7 +150,7 @@ const Profile: React.FC = () => {
                <span className="text-[12px] font-light uppercase tracking-[0.45em] text-primary/45">Your Profile</span>
                <div className="h-px w-12 bg-primary/10" />
             </div>
-            <h1 className="font-serif text-6xl md:text-8xl font-light text-primary tracking-tight italic leading-none uppercase">
+            <h1 className="font-serif text-4xl sm:text-6xl md:text-7xl font-light text-primary tracking-tight italic leading-none uppercase">
               {profileData.name || 'Anonymous User'}
             </h1>
             <div className="flex items-center justify-center lg:justify-start gap-6 pt-4">
@@ -165,7 +166,7 @@ const Profile: React.FC = () => {
         </div>
       </section>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-24">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-16">
         {/* Left Column: Form/Info */}
         <div className="lg:col-span-12 xl:col-span-8">
           <AnimatePresence mode="wait">
@@ -176,8 +177,8 @@ const Profile: React.FC = () => {
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-16"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-12">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                  <div className="space-y-8">
                     <div className="group">
                       <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-primary/30 mb-2">Major / Field of Study</p>
                       <p className="font-serif text-4xl font-light text-primary italic uppercase tracking-tight">{profileData.major || 'Not set yet'}</p>
@@ -185,14 +186,14 @@ const Profile: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="glass-panel rounded-[3rem] p-12 bg-primary/[0.02] border border-primary/5 space-y-8 flex flex-col justify-center">
+                  <div className="glass-panel rounded-2xl md:rounded-[2rem] p-6 md:p-8 bg-primary/[0.02] border border-primary/5 space-y-6 flex flex-col justify-center">
                     <h3 className="font-serif text-2xl font-light text-primary leading-tight">Edit Your Info</h3>
                     <p className="text-lg text-primary/50 font-serif italic leading-relaxed">
                       Keep your details up to date so Regrade can personalize your appeal letters.
                     </p>
                     <button
                       onClick={() => setIsEditing(true)}
-                      className="w-full py-5 rounded-2xl bg-primary text-white font-bold uppercase tracking-[0.3em] text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all"
+                      className="w-full min-h-[48px] py-3 rounded-2xl bg-primary text-white font-bold uppercase tracking-[0.3em] text-[10px] shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all"
                     >
                       Edit Profile
                     </button>
@@ -200,9 +201,9 @@ const Profile: React.FC = () => {
                 </div>
 
                 <div className="flex gap-4">
-                   <button 
+                   <button
                     onClick={handleSignOut}
-                    className="px-10 py-5 rounded-2xl border border-red-500/20 text-red-500/40 font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-red-500 hover:text-white transition-all"
+                    className="min-h-[48px] px-8 py-3 rounded-2xl border border-red-500/20 text-red-500/40 font-bold uppercase tracking-[0.3em] text-[10px] hover:bg-red-500 hover:text-white transition-all"
                   >
                     Sign Out
                   </button>
@@ -214,44 +215,53 @@ const Profile: React.FC = () => {
                 initial={{ opacity: 0, scale: 0.98 }}
                 animate={{ opacity: 1, scale: 1 }}
                 onSubmit={handleUpdate}
-                className="glass-panel rounded-[4rem] p-16 space-y-12 border border-primary/10 bg-white shadow-huge"
+                className="glass-panel rounded-2xl sm:rounded-[3rem] p-6 sm:p-10 space-y-6 sm:space-y-8 border border-primary/10 bg-white shadow-huge"
               >
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-4">Legal Full Name</label>
-                    <input 
+                {securityError && (
+                  <div className="p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-xs font-bold leading-relaxed flex items-start gap-3">
+                    <ICONS.AlertCircle size={16} className="shrink-0 mt-0.5" />
+                    {securityError}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-2">Legal Full Name</label>
+                    <input
                       type="text"
                       required
+                      autoComplete="name"
                       value={profileData.name}
                       onChange={(e) => setProfileData({...profileData, name: e.target.value})}
-                      className="w-full bg-surface/50 border border-primary/10 rounded-[2rem] px-8 py-5 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 text-xl font-serif italic"
+                      className="w-full bg-surface/50 border border-primary/10 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 text-lg font-serif italic min-h-[52px]"
                     />
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-4">Major / Course Field</label>
-                    <input 
+                  <div className="space-y-3">
+                    <label className="text-[10px] font-bold uppercase tracking-widest opacity-40 ml-2">Major / Course Field</label>
+                    <input
                       type="text"
                       required
+                      autoComplete="organization"
                       value={profileData.major}
                       onChange={(e) => setProfileData({...profileData, major: e.target.value})}
-                      className="w-full bg-surface/50 border border-primary/10 rounded-[2rem] px-8 py-5 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 text-xl font-serif italic"
+                      className="w-full bg-surface/50 border border-primary/10 rounded-2xl px-5 py-4 outline-none focus:ring-2 focus:ring-primary/10 focus:border-primary/30 text-lg font-serif italic min-h-[52px]"
                     />
                   </div>
                 </div>
 
-                <div className="flex gap-6 pt-12 border-t border-primary/5">
-                  <button 
+                <div className="flex gap-4 pt-6 border-t border-primary/5">
+                  <button
                     type="button"
                     onClick={() => setIsEditing(false)}
-                    className="flex-1 py-5 font-bold uppercase tracking-[0.3em] text-[10px] text-primary/40 hover:bg-primary/5 rounded-2xl transition-all border border-transparent hover:border-primary/10"
+                    className="flex-1 min-h-[48px] py-3 font-bold uppercase tracking-[0.3em] text-[10px] text-primary/40 hover:bg-primary/5 rounded-2xl transition-all border border-transparent hover:border-primary/10"
                   >
                     Cancel
                   </button>
-                  <button 
+                  <button
                     type="submit"
                     disabled={scanning}
-                    className="flex-1 py-5 font-bold uppercase tracking-[0.3em] text-[10px] text-white bg-primary rounded-2xl shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
+                    className="flex-1 min-h-[48px] py-3 font-bold uppercase tracking-[0.3em] text-[10px] text-white bg-primary rounded-2xl shadow-lg shadow-primary/20 hover:-translate-y-1 transition-all disabled:opacity-50 flex items-center justify-center gap-3"
                   >
                     {scanning ? <ICONS.RefreshCcw className="animate-spin" size={20} /> : null}
                     {scanning ? 'Saving...' : 'Save Changes'}
@@ -264,7 +274,7 @@ const Profile: React.FC = () => {
 
         {/* Right Column: Security Logs */}
         <div className="lg:col-span-12 xl:col-span-4 lg:sticky lg:top-32 h-fit">
-           <div className="glass-panel rounded-[3.5rem] p-12 border border-primary/10 bg-primary/5 space-y-12">
+           <div className="glass-panel rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-8 border border-primary/10 bg-primary/5 space-y-8">
               <div className="space-y-2">
                 <h3 className="text-xs font-black uppercase tracking-[0.6em] text-primary/50">Account Activity</h3>
                 <p className="text-xs font-serif italic text-primary/30 leading-snug">Recent security events for your account.</p>
@@ -285,7 +295,7 @@ const Profile: React.FC = () => {
                 ))}
               </div>
 
-              <div className="pt-12 border-t border-primary/10 flex flex-col items-center text-center space-y-6">
+              <div className="pt-6 border-t border-primary/10 flex flex-col items-center text-center space-y-4">
                  <ICONS.Shield size={48} className="text-primary/10" />
                  <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-primary/30">Regrade — Your data is private</p>
               </div>

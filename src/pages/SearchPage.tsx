@@ -91,7 +91,7 @@ export function SearchPage() {
               key={p}
               type="button"
               onClick={() => setPlatform(p)}
-              className={`rounded-full px-3 py-1.5 text-xs font-semibold ring-1 ring-vault-border transition ${
+              className={`rounded-full px-4 py-2.5 text-xs font-semibold ring-1 ring-vault-border transition min-h-[44px] flex items-center ${
                 platform === p
                   ? "bg-vault-muted/30 text-vault-fg shadow-sm"
                   : "bg-vault-pill-bg text-vault-muted hover:bg-vault-scrim"
