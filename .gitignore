@@ -34,3 +34,8 @@ regrade-android/**/outputs/
 regrade-ios/App/Pods/
 regrade-ios/**/xcuserdata/
 regrade-ios/DerivedData/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
