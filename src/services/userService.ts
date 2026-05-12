@@ -25,6 +25,8 @@ export const userService = {
         const newProfile = {
           name: profile.name || 'Anonymous Student',
           email: profile.email || '',
+          /** Required by Firestore rules on create; optional in product UI. */
+          studentId: profile.studentId ?? '',
           major: profile.major ?? 'Undeclared',
           avatarUrl: profile.avatarUrl || '',
           createdAt: serverTimestamp(),

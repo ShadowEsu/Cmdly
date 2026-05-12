@@ -3,9 +3,47 @@ import { motion } from 'motion/react';
 import { ICONS } from '../constants';
 import { caseService, Case } from '../services/caseService';
 
+function buildAppealEmail(analysis: NonNullable<Case['analysis']>, caseRef: string): string {
+  const title = analysis.assignment.title ?? 'my recent assignment';
+  const score = analysis.assignment.total_score_display ?? 'the recorded score';
+  const points = analysis.case_analysis.unexplained_deductions
+    .concat(analysis.case_analysis.potential_calculation_errors.map((e) => ({
+      question_id: e.question_id,
+      points_lost: e.discrepancy,
+      what_is_missing: e.explanation,
+    })))
+    .map((d) => `- ${d.question_id}: ${d.what_is_missing} (–${d.points_lost} pts)`)
+    .join('\n');
+  const angles = analysis.case_analysis.strongest_appeal_points.slice(0, 2).join(' ');
+
+  return [
+    `Subject: Grade Appeal Request — ${title} (Case ${caseRef})`,
+    '',
+    'Dear Professor,',
+    '',
+    `I am writing to respectfully request a review of my grade on ${title}. The recorded score is ${score}.`,
+    '',
+    'After reviewing the rubric and feedback, I identified the following concerns:',
+    '',
+    points || '(See attached evidence)',
+    '',
+    angles ? `Additionally: ${angles}` : '',
+    '',
+    'I would appreciate the opportunity to discuss this further at your convenience.',
+    '',
+    'Thank you for your time.',
+    '',
+    'Sincerely,',
+    '[Your Name]',
+  ]
+    .filter((l) => l !== undefined)
+    .join('\n');
+}
+
 export default function VerdictReport({ caseId, onSubmit }: { caseId: string | null; onSubmit?: () => void }) {
   const [currentCase, setCurrentCase] = useState<Case | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     if (caseId) {
@@ -98,13 +136,35 @@ export default function VerdictReport({ caseId, onSubmit }: { caseId: string | n
         </div>
 
         <div className="flex flex-wrap gap-4 pt-6 md:pt-8">
-          <button
-            type="button"
-            className="bg-primary text-white px-8 sm:px-12 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] font-light uppercase tracking-[0.28em] text-[11px] sm:text-xs hover:shadow-[0_20px_50px_rgba(0,35,111,0.3)] hover:-translate-y-1 transition-all flex items-center gap-4 group w-full sm:w-auto justify-center min-h-[48px]"
-          >
-            Write appeal letter
-            <ICONS.ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
-          </button>
+          {analysis && (
+            <button
+              type="button"
+              onClick={async () => {
+                const email = buildAppealEmail(analysis, currentCase?.ref ?? 'REF');
+                try {
+                  await navigator.clipboard.writeText(email);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2500);
+                } catch {
+                  /* fallback: open mailto */
+                  window.location.href = `mailto:?subject=Grade Appeal&body=${encodeURIComponent(email)}`;
+                }
+              }}
+              className="bg-primary text-white px-8 sm:px-12 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] font-light uppercase tracking-[0.28em] text-[11px] sm:text-xs hover:shadow-[0_20px_50px_rgba(0,35,111,0.3)] hover:-translate-y-1 transition-all flex items-center gap-4 group w-full sm:w-auto justify-center min-h-[48px]"
+            >
+              {copied ? (
+                <>
+                  <ICONS.Check className="w-4 h-4" />
+                  Copied to clipboard
+                </>
+              ) : (
+                <>
+                  Copy appeal email
+                  <ICONS.ArrowRight className="w-4 h-4 group-hover:translate-x-2 transition-transform" />
+                </>
+              )}
+            </button>
+          )}
           <button
             type="button"
             className="bg-white border-2 border-primary/10 text-primary px-8 sm:px-12 py-4 sm:py-5 rounded-2xl sm:rounded-[2rem] font-light uppercase tracking-[0.28em] text-[11px] sm:text-xs hover:bg-primary/5 transition-all w-full sm:w-auto min-h-[48px]"
@@ -113,6 +173,46 @@ export default function VerdictReport({ caseId, onSubmit }: { caseId: string | n
           </button>
         </div>
       </section>
+
+      {/* What We Saw — platform + totals summary before the verdict detail */}
+      {analysis && (
+        <section className="grid grid-cols-2 sm:grid-cols-4 gap-4 py-2">
+          {[
+            { label: 'Platform detected', val: analysis.source_platform.replace('_', ' ') },
+            {
+              label: 'Score',
+              val: analysis.assignment.total_score_display ?? (analysis.assignment.total_score_earned != null ? `${analysis.assignment.total_score_earned}` : '—'),
+            },
+            {
+              label: 'Questions parsed',
+              val: analysis.questions.length > 0 ? String(analysis.questions.length) : '—',
+            },
+            {
+              label: 'Model confidence',
+              val: analysis.confidence.overall_confidence != null ? `${Math.round(analysis.confidence.overall_confidence * 100)}%` : '—',
+            },
+          ].map((stat) => (
+            <div key={stat.label} className="bg-primary/[0.03] border border-primary/10 rounded-2xl p-4 space-y-1">
+              <p className="text-[10px] font-bold uppercase tracking-widest text-primary/40">{stat.label}</p>
+              <p className="font-serif text-2xl font-light text-primary capitalize">{stat.val}</p>
+            </div>
+          ))}
+        </section>
+      )}
+
+      {/* Low-confidence items notice */}
+      {analysis && analysis.confidence.low_confidence_items.length > 0 && (
+        <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-2xl text-amber-800 text-sm">
+          <ICONS.AlertCircle size={18} className="shrink-0 mt-0.5" />
+          <div>
+            <p className="font-bold text-[11px] uppercase tracking-widest mb-1">Some items read with low confidence</p>
+            <p className="text-xs font-serif italic leading-relaxed">{analysis.confidence.low_confidence_items.join('; ')}</p>
+            {analysis.confidence.retake_reason && (
+              <p className="text-xs mt-1 font-bold">Suggestion: {analysis.confidence.retake_reason}</p>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Discovery Dashboard */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 md:gap-12">

@@ -5,9 +5,12 @@ import { ICONS, DEFAULT_AVATAR_SRC } from '../constants';
 import { auth, loginWithGoogle, signOut } from '../lib/firebase';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { userService, UserProfile } from '../services/userService';
+import { memoryService, UserPreferences } from '../services/memoryService';
 import { scanContentForThreats } from '../lib/securityScanner';
+import { useLegalLinks } from '../context/LegalLinksContext';
 
 const Profile: React.FC = () => {
+  const legal = useLegalLinks();
   const [user, setUser] = useState<User | null>(auth.currentUser);
   const [profileData, setProfileData] = useState<Pick<UserProfile, 'name' | 'email' | 'major'>>({
     name: '',
@@ -19,6 +22,11 @@ const Profile: React.FC = () => {
   const [scanning, setScanning] = useState(false);
   const [showSecurityToast, setShowSecurityToast] = useState(false);
   const [securityError, setSecurityError] = useState<string | null>(null);
+
+  // C2: Memory / preferences
+  const [prefs, setPrefs] = useState<UserPreferences>({});
+  const [editingPrefs, setEditingPrefs] = useState(false);
+  const [prefsLoading, setPrefsLoading] = useState(false);
   const [securityLogs, setSecurityLogs] = useState([
     { event: 'Account authenticated', status: 'Passed', time: '2m ago' },
     { event: 'Session established', status: 'Verified', time: '1m ago' },
@@ -40,6 +48,12 @@ const Profile: React.FC = () => {
           }
         } catch (err) {
           console.error("Failed to fetch profile:", err);
+        }
+        try {
+          const p = await memoryService.getPreferences(u.uid);
+          if (p) setPrefs(p);
+        } catch {
+          /* preferences are optional */
         }
       }
       setLoading(false);
@@ -208,6 +222,124 @@ const Profile: React.FC = () => {
                     Sign Out
                   </button>
                 </div>
+
+                {/* C2: Memory / Preferences panel */}
+                <div className="glass-panel rounded-2xl sm:rounded-[2.5rem] p-6 sm:p-8 border border-primary/10 space-y-6 mt-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-serif text-xl text-primary font-light">Appeal memory</h3>
+                      <p className="text-[11px] text-primary/45 mt-0.5">Regrade remembers these to personalise your appeals. You control it.</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditingPrefs((v) => !v)}
+                      className="min-h-[44px] px-4 py-2 text-[10px] font-bold uppercase tracking-widest border border-primary/10 rounded-xl hover:bg-primary/5 transition-colors text-primary/50"
+                    >
+                      {editingPrefs ? 'Done' : 'Edit'}
+                    </button>
+                  </div>
+
+                  {!editingPrefs ? (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                      {[
+                        { label: 'Tone preference', val: prefs.preferredTone ?? 'Not set' },
+                        { label: 'Primary platform', val: prefs.primaryPlatform ?? 'Not set' },
+                        { label: 'School', val: prefs.schoolName ?? 'Not set' },
+                        { label: 'Notes for AI', val: prefs.notesForAdvocate ?? 'Not set' },
+                      ].map((item) => (
+                        <div key={item.label} className="space-y-1">
+                          <p className="text-[10px] font-bold uppercase tracking-widest text-primary/35">{item.label}</p>
+                          <p className="font-serif italic text-primary/70 truncate">{item.val}</p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (!user) return;
+                        setPrefsLoading(true);
+                        try {
+                          await memoryService.savePreferences(user.uid, prefs);
+                          setEditingPrefs(false);
+                        } catch (err) {
+                          console.error('Failed to save preferences:', err);
+                        } finally {
+                          setPrefsLoading(false);
+                        }
+                      }}
+                      className="space-y-4"
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40">Tone preference</label>
+                          <select
+                            value={prefs.preferredTone ?? ''}
+                            onChange={(e) => setPrefs({ ...prefs, preferredTone: (e.target.value || undefined) as UserPreferences['preferredTone'] })}
+                            className="w-full bg-white border border-primary/10 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/10"
+                          >
+                            <option value="">Not set</option>
+                            <option value="formal">Formal</option>
+                            <option value="assertive">Assertive</option>
+                            <option value="diplomatic">Diplomatic</option>
+                          </select>
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40">Primary LMS</label>
+                          <input
+                            type="text"
+                            value={prefs.primaryPlatform ?? ''}
+                            onChange={(e) => setPrefs({ ...prefs, primaryPlatform: e.target.value || undefined })}
+                            placeholder="Canvas, Gradescope…"
+                            className="w-full bg-white border border-primary/10 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/10"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40">School name</label>
+                          <input
+                            type="text"
+                            value={prefs.schoolName ?? ''}
+                            onChange={(e) => setPrefs({ ...prefs, schoolName: e.target.value || undefined })}
+                            placeholder="University of…"
+                            className="w-full bg-white border border-primary/10 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/10"
+                          />
+                        </div>
+                        <div className="space-y-2">
+                          <label className="text-[10px] font-bold uppercase tracking-widest text-primary/40">Notes for AI assistant</label>
+                          <input
+                            type="text"
+                            value={prefs.notesForAdvocate ?? ''}
+                            onChange={(e) => setPrefs({ ...prefs, notesForAdvocate: e.target.value || undefined })}
+                            placeholder="e.g. I have ADA accommodations"
+                            className="w-full bg-white border border-primary/10 rounded-xl px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/10"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-3 pt-2">
+                        <button
+                          type="submit"
+                          disabled={prefsLoading}
+                          className="min-h-[44px] px-6 py-2 bg-primary text-white rounded-xl text-[10px] font-bold uppercase tracking-widest disabled:opacity-50"
+                        >
+                          {prefsLoading ? 'Saving…' : 'Save memory'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            if (!user) return;
+                            if (!confirm('Clear all saved memory? This cannot be undone.')) return;
+                            await memoryService.deleteAll(user.uid);
+                            setPrefs({});
+                            setEditingPrefs(false);
+                          }}
+                          className="min-h-[44px] px-6 py-2 border border-red-500/20 text-red-500/50 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-red-50 transition-colors"
+                        >
+                          Clear all
+                        </button>
+                      </div>
+                    </form>
+                  )}
+                </div>
               </motion.div>
             ) : (
               <motion.form 
@@ -302,6 +434,17 @@ const Profile: React.FC = () => {
            </div>
         </div>
       </div>
+
+      {legal ? (
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-2 py-8 text-[10px] font-bold uppercase tracking-[0.25em] text-primary/35">
+          <button type="button" onClick={legal.openPrivacy} className="min-h-[44px] px-2 hover:text-primary transition-colors">
+            Privacy
+          </button>
+          <button type="button" onClick={legal.openSupport} className="min-h-[44px] px-2 hover:text-primary transition-colors">
+            Support
+          </button>
+        </div>
+      ) : null}
 
       <AnimatePresence>
         {showSecurityToast && (

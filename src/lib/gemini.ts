@@ -16,6 +16,28 @@ async function readApiError(res: Response): Promise<string> {
   return `Request failed (${res.status})`;
 }
 
+const POLL_INTERVAL_MS = 2_000;
+const POLL_MAX_ATTEMPTS = 90; // 3 minutes max
+
+async function pollJob(jobId: string): Promise<AnalysisResult> {
+  for (let i = 0; i < POLL_MAX_ATTEMPTS; i++) {
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
+    const res = await apiFetch(`/v1/gemini/jobs/${jobId}`);
+    if (!res.ok) {
+      throw new Error(await readApiError(res));
+    }
+    const data = (await res.json()) as {
+      status: 'pending' | 'running' | 'done' | 'failed';
+      result?: AnalysisResult;
+      error?: string;
+    };
+    if (data.status === 'done' && data.result) return data.result;
+    if (data.status === 'failed') throw new Error(data.error ?? 'Analysis failed.');
+    // pending/running: keep polling
+  }
+  throw new Error('Analysis timed out. Please try again.');
+}
+
 export async function performComprehensiveAnalysis(
   assignmentData: string,
   rubricData: string,
@@ -32,9 +54,18 @@ export async function performComprehensiveAnalysis(
         inlineImages: options?.inlineImages ?? [],
       }),
     });
+
     if (!res.ok) {
       throw new Error(await readApiError(res));
     }
+
+    // Check if server returned a job (202) or direct result (200 cache hit)
+    if (res.status === 202) {
+      const { jobId } = (await res.json()) as { jobId: string };
+      return await pollJob(jobId);
+    }
+
+    // Direct result (cache hit)
     return res.json() as Promise<AnalysisResult>;
   } catch (error) {
     console.error('Gemini Analysis Error:', error);

@@ -1,14 +1,19 @@
 import type { FirebaseOptions } from 'firebase/app';
+import type { ActionCodeSettings } from 'firebase/auth';
 import { initializeApp } from 'firebase/app';
 import {
   getAuth,
   GoogleAuthProvider,
   signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   sendEmailVerification,
   sendPasswordResetEmail,
+  reload,
+  applyActionCode,
 } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
@@ -65,12 +70,27 @@ export const auth = getAuth(app);
 export const db = getFirestore(app, firestoreDatabaseId);
 export const googleProvider = new GoogleAuthProvider();
 
+/**
+ * Continue URL for verification / password-reset emails.
+ * Use handleCodeInApp: false on web — true requires extra Dynamic Links / mobile setup and often causes
+ * auth/unauthorized-continue-uri or silent failures.
+ */
+export function getAuthActionCodeSettings(): ActionCodeSettings | undefined {
+  if (typeof window === 'undefined' || !window.location?.origin) return undefined;
+  return {
+    url: `${window.location.origin}/`,
+    handleCodeInApp: false,
+  };
+}
+
 export {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
   signOut,
   sendEmailVerification,
   sendPasswordResetEmail,
+  reload,
+  applyActionCode,
 };
 
 export enum OperationType {
@@ -122,6 +142,20 @@ export const loginWithGoogle = async () => {
     if (code !== 'auth/popup-closed-by-user') {
       console.error('Auth Error', error);
     }
+    if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
+      // Embedded browsers (like Cursor's) often block popups/passkeys; redirect is more reliable.
+      await signInWithRedirect(auth, googleProvider);
+      return null;
+    }
     throw error;
   }
 };
+
+export async function finishGoogleRedirect() {
+  try {
+    return await getRedirectResult(auth);
+  } catch (error) {
+    console.error('Redirect Auth Error', error);
+    throw error;
+  }
+}

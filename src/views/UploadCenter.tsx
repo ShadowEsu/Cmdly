@@ -4,8 +4,20 @@ import { ICONS } from '../constants';
 import Advocate from './Advocate';
 import { caseService } from '../services/caseService';
 import { scanContentForThreats } from '../lib/securityScanner';
+import { compressImage, formatBytes } from '../lib/imageCompressor';
 
 type PdfStatus = 'idle' | 'loading' | 'done' | 'error';
+type AnalysisStage = 'idle' | 'scanning' | 'queued' | 'extracting' | 'verifying' | 'ready' | 'error';
+
+const STAGE_LABELS: Record<AnalysisStage, string> = {
+  idle: '',
+  scanning: 'Scanning for safety…',
+  queued: 'Queued for analysis…',
+  extracting: 'Extracting grades and rubric…',
+  verifying: 'Verifying findings…',
+  ready: 'Analysis complete',
+  error: 'Analysis failed',
+};
 
 type StagedUpload = {
   id: string;
@@ -15,6 +27,8 @@ type StagedUpload = {
   pdfText?: string;
   pdfStatus: PdfStatus;
   pdfError?: string;
+  compressedBytes?: number;
+  originalBytes?: number;
 };
 
 const MAX_IMAGES_FOR_API = 6;
@@ -44,12 +58,29 @@ async function fileToBase64Inline(file: File): Promise<{ mimeType: string; data:
   };
 }
 
+async function compressAndEncode(file: File): Promise<{ mimeType: string; data: string; savedBytes: number }> {
+  const compressed = await compressImage(file);
+  const buf = await compressed.blob.arrayBuffer();
+  const bytes = new Uint8Array(buf);
+  const chunk = 0x8000;
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += chunk) {
+    binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk) as unknown as number[]);
+  }
+  return {
+    mimeType: compressed.mimeType,
+    data: btoa(binary),
+    savedBytes: compressed.originalBytes - compressed.compressedBytes,
+  };
+}
+
 export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string) => void }) {
   /** Single optional box — rubric, marks, and feedback are inferred from the upload by default. */
   const [extraNotes, setExtraNotes] = useState('');
 
   const [showAdvocate, setShowAdvocate] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [analysisStage, setAnalysisStage] = useState<AnalysisStage>('idle');
   const [securityError, setSecurityError] = useState<string | null>(null);
 
   const [stagedUploads, setStagedUploads] = useState<StagedUpload[]>([]);
@@ -111,6 +142,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
         progress: 0,
         previewUrl,
         pdfStatus: isPdf ? 'loading' : 'idle',
+        originalBytes: file.size,
       };
 
       setStagedUploads((prev) => [...prev, entry]);
@@ -241,6 +273,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
     }
 
     setLoading(true);
+    setAnalysisStage('scanning');
     setSecurityError(null);
 
     try {
@@ -259,16 +292,31 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
             "Your submission contains content that can't be processed. Please review and try again.",
         );
         setLoading(false);
+        setAnalysisStage('error');
         return;
       }
 
+      setAnalysisStage('queued');
       const { performComprehensiveAnalysis } = await import('../lib/gemini');
 
+      // A1: Compress images before encoding
       const inlineImages = [];
       for (const s of imageFiles.slice(0, MAX_IMAGES_FOR_API)) {
-        inlineImages.push(await fileToBase64Inline(s.file));
+        const encoded = await compressAndEncode(s.file);
+        inlineImages.push({ mimeType: encoded.mimeType, data: encoded.data });
+        // Update the staged upload with compression info
+        if (encoded.savedBytes > 0) {
+          setStagedUploads((prev) =>
+            prev.map((u) =>
+              u.id === s.id
+                ? { ...u, compressedBytes: s.file.size - encoded.savedBytes, originalBytes: s.file.size }
+                : u,
+            ),
+          );
+        }
       }
 
+      setAnalysisStage('extracting');
       const analysisResult = await performComprehensiveAnalysis(
         assignmentBlock || '[No pasted assignment — use uploaded images and any PDF text above.]',
         rubricBlock,
@@ -276,6 +324,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
         inlineImages.length ? { inlineImages } : undefined,
       );
 
+      setAnalysisStage('verifying');
       const docRef = await caseService.createCase({
         title: analysisResult.assignment.title || 'New Appeal',
         description: `Analysis complete for ${analysisResult.assignment.subject || 'your assignment'}. Case strength: ${analysisResult.case_analysis.overall_case_strength}.`,
@@ -291,9 +340,12 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           feedback: '',
         },
       });
+
+      setAnalysisStage('ready');
       onSubmit(docRef.id);
     } catch (err: unknown) {
       console.error('Analysis failed:', err);
+      setAnalysisStage('error');
       setSecurityError(
         err instanceof Error
           ? err.message
@@ -576,7 +628,16 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
                     </div>
                   )}
                   <div className="p-2.5 flex items-center justify-between gap-2 border-t border-primary/5">
-                    <span className="text-[10px] text-primary/45 truncate">{u.file.name}</span>
+                    <div className="min-w-0">
+                      <span className="text-[10px] text-primary/45 truncate block">{u.file.name}</span>
+                      {u.originalBytes && u.compressedBytes && u.compressedBytes < u.originalBytes ? (
+                        <span className="text-[9px] text-secondary font-bold">
+                          {formatBytes(u.originalBytes)} → {formatBytes(u.compressedBytes)} compressed
+                        </span>
+                      ) : u.originalBytes ? (
+                        <span className="text-[9px] text-primary/30">{formatBytes(u.originalBytes)}</span>
+                      ) : null}
+                    </div>
                     <button
                       type="button"
                       onClick={() => removeFile(u.id)}
@@ -624,6 +685,15 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
           </motion.div>
         )}
 
+        {loading && analysisStage !== 'idle' && (
+          <div className="flex items-center gap-3 py-3 px-4 bg-primary/[0.04] rounded-xl border border-primary/10">
+            <ICONS.AILogo className="animate-spin text-primary shrink-0" size={16} />
+            <span className="text-[11px] font-bold uppercase tracking-widest text-primary/60">
+              {STAGE_LABELS[analysisStage]}
+            </span>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 border-t border-primary/5">
           <div className="flex items-center gap-2 text-primary/35">
             <ICONS.Shield className="shrink-0" size={20} />
@@ -635,7 +705,7 @@ export default function UploadCenter({ onSubmit }: { onSubmit: (caseId?: string)
             disabled={loading}
             className="w-full sm:w-auto flex items-center justify-center gap-3 bg-primary text-white px-10 py-5 rounded-2xl font-bold uppercase tracking-[0.2em] text-[11px] hover:shadow-xl hover:shadow-primary/20 transition-all disabled:opacity-50"
           >
-            {loading ? 'Analyzing…' : 'Analyze worksheet'}
+            {loading ? STAGE_LABELS[analysisStage] || 'Analyzing…' : 'Analyze worksheet'}
             {!loading && <ICONS.ArrowRight className="opacity-70" size={18} />}
           </button>
         </div>

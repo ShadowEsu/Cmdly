@@ -59,6 +59,10 @@ export default function Dashboard({
             <p className="leading-relaxed font-serif max-w-xl text-primary/70">
               Ready to help you build a clear, professional grade appeal.
             </p>
+            <p className="text-[11px] font-sans font-medium text-primary/45 max-w-xl leading-relaxed">
+              AI-generated guidance is educational only — not legal advice and not a guarantee of outcomes. Always follow your
+              school&apos;s policies.
+            </p>
           </div>
         </div>
 

@@ -23,3 +23,14 @@ android/local.properties
 android/keystore.properties
 android/**/*.jks
 android/**/*.keystore
+
+# Capacitor (Regrade) — separate from Kotlin android/ above
+regrade-android/.gradle/
+regrade-android/**/build/
+regrade-android/captures/
+regrade-android/*.iml
+regrade-android/local.properties
+regrade-android/**/outputs/
+regrade-ios/App/Pods/
+regrade-ios/**/xcuserdata/
+regrade-ios/DerivedData/

@@ -92,6 +92,9 @@ export const ICONS = {
   Edit: Edit3
 };
 
+/** Shown in Support; replace with your real inbox before App Store / Play launch. */
+export const SUPPORT_EMAIL = 'support@example.com';
+
 /** Neutral placeholder avatar (no expressive stock face) when the user has no photo. */
 export const DEFAULT_AVATAR_SRC =
   'data:image/svg+xml,' +

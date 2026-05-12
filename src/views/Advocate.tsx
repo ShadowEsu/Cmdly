@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion } from 'motion/react';
 import { ICONS } from '../constants';
-import { chatWithAdvocate } from '../lib/gemini';
 
 export default function Advocate({ onBack }: { onBack: () => void }) {
   const [messages, setMessages] = useState([
@@ -30,18 +29,25 @@ export default function Advocate({ onBack }: { onBack: () => void }) {
     try {
       // Map our app roles to Gemini roles
       const history = messages.slice(1).map(m => ({
-        role: m.role === 'ai' ? 'model' as const : 'user' as const,
-        text: m.text
+        role: m.role === 'ai' ? ('model' as const) : ('user' as const),
+        text: m.text,
       }));
 
+      const { chatWithAdvocate } = await import('../lib/gemini');
       const response = await chatWithAdvocate(userMessage, history);
-      
-      setMessages(prev => [...prev, { role: 'ai', text: response || "I'm sorry, I couldn't process that request." }]);
-    } catch (error: any) {
-      setMessages(prev => [...prev, { 
-        role: 'ai', 
-        text: "Sorry, I ran into an error. Please try again."
-      }]);
+
+      setMessages((prev) => [
+        ...prev,
+        { role: 'ai', text: response || "I'm sorry, I couldn't process that request." },
+      ]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: 'ai',
+          text: 'Sorry, I ran into an error. Please try again.',
+        },
+      ]);
     } finally {
       setLoading(false);
     }

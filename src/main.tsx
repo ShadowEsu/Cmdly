@@ -2,6 +2,7 @@ import React, {StrictMode, type ReactNode} from 'react';
 import {createRoot} from 'react-dom/client';
 import App from './App.tsx';
 import AuthGate from './AuthGate.tsx';
+import { LegalLinksProvider } from './context/LegalLinksContext';
 import './index.css';
 
 class BootErrorBoundary extends React.Component<{children: ReactNode}, {error: Error | null}> {
@@ -43,9 +44,11 @@ try {
   createRoot(el).render(
     <StrictMode>
       <BootErrorBoundary>
-        <AuthGate>
-          <App />
-        </AuthGate>
+        <LegalLinksProvider>
+          <AuthGate>
+            <App />
+          </AuthGate>
+        </LegalLinksProvider>
       </BootErrorBoundary>
     </StrictMode>,
   );

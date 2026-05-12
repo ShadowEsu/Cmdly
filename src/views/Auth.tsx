@@ -1,65 +1,77 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   signInWithEmailAndPassword,
   createUserWithEmailAndPassword,
   loginWithGoogle,
+  finishGoogleRedirect,
   sendPasswordResetEmail,
   sendEmailVerification,
-  auth
+  signOut,
+  auth,
+  getAuthActionCodeSettings,
 } from '../lib/firebase';
 import { ICONS } from '../constants';
+import { useLegalLinks } from '../context/LegalLinksContext';
 
 import Logo from '../components/Logo';
+import { formatFirebaseAuthError } from '../lib/authErrors';
+import { consumePostVerifyNotice } from '../lib/authSession';
 
 const Auth: React.FC = () => {
+  const legal = useLegalLinks();
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [forgotPassword, setForgotPassword] = useState(false);
 
-  const authMessageFromError = (err: unknown) => {
-    const anyErr = err as { code?: string; message?: string };
-    const code = anyErr?.code || '';
+  useEffect(() => {
+    const postVerify = consumePostVerifyNotice();
+    if (postVerify) setNotice(postVerify);
+  }, []);
 
-    if (code === 'auth/invalid-email') return 'That email address is invalid. Double-check it and try again.';
-    if (code === 'auth/missing-email') return 'Please enter your email address first.';
-    if (code === 'auth/user-not-found')
-      return 'No account exists for that email yet. Create an account first, or use a different email.';
-    if (code === 'auth/wrong-password') return 'Incorrect password. Try again or use “Forgot password?”.';
-    if (code === 'auth/too-many-requests')
-      return 'Too many attempts. Wait a bit and try again, or reset your password.';
-    if (code === 'auth/operation-not-allowed')
-      return 'Firebase Auth isn’t enabled for this sign-in method yet. In Firebase Console → Authentication → Sign-in method, enable Email/Password (and/or Google).';
-    if (code === 'auth/unauthorized-domain')
-      return 'This hostname isn’t allowed for Firebase Auth yet. In Firebase Console → Authentication → Settings → Authorized domains, add your hostname (e.g. localhost or 127.0.0.1).';
-
-    return anyErr?.message || 'An authentication error occurred.';
-  };
+  useEffect(() => {
+    // If Google sign-in used redirect (popup blocked), complete it here.
+    finishGoogleRedirect().catch((err) => {
+      const anyErr = err as { code?: string };
+      if (anyErr?.code) {
+        setError(formatFirebaseAuthError(err));
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleGoogleLogin = async () => {
     setError(null);
     setNotice(null);
-    setLoading(true);
+    setGoogleLoading(true);
     try {
       await loginWithGoogle();
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const anyErr = err as { code?: string; message?: string };
       // Ignore if user closed the popup
-      if (err.code === 'auth/popup-closed-by-user' || err.message?.includes('popup-closed-by-user')) {
+      if (anyErr.code === 'auth/popup-closed-by-user' || anyErr.message?.includes('popup-closed-by-user')) {
         return;
       }
-      if (err.code === 'auth/unauthorized-domain') {
+      if (anyErr.code === 'auth/popup-blocked' || anyErr.message?.includes('popup-blocked')) {
+        setNotice(
+          'Redirecting to Google — your browser will leave this page for a moment, then come back. If nothing happens, allow popups or try another browser.',
+        );
+        return;
+      }
+      if (anyErr.code === 'auth/unauthorized-domain') {
         setError(
           'This exact URL isn’t allowed for sign-in yet. In Firebase → Authentication → Settings → Authorized domains, add your hostname (if you use http://127.0.0.1:3000, add 127.0.0.1 — it’s different from localhost). Or open the app at http://localhost:3000 instead.',
         );
         return;
       }
-      setError(err.message || "Something went wrong. Please try again.");
+      setError(formatFirebaseAuthError(err));
     } finally {
-      setLoading(false);
+      setGoogleLoading(false);
     }
   };
 
@@ -76,21 +88,25 @@ const Auth: React.FC = () => {
           setError('Please enter your email address first.');
           return;
         }
-        await sendPasswordResetEmail(auth, trimmedEmail);
+        await sendPasswordResetEmail(auth, trimmedEmail, getAuthActionCodeSettings() ?? undefined);
         setNotice('Password reset email sent. Check your inbox (and spam).');
         setForgotPassword(false);
       } else if (isLogin) {
         await signInWithEmailAndPassword(auth, email, password);
       } else {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
-        await sendEmailVerification(cred.user);
-        setNotice('Account created! Please check your email and verify your address before signing in.');
+        await sendEmailVerification(cred.user, getAuthActionCodeSettings() ?? undefined);
+        await signOut(auth);
+        setPassword('');
+        setNotice(
+          'Account created. We emailed you a verification link — open it, then sign in here. (We never send your password by email.)',
+        );
         setIsLogin(true);
         return;
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Auth error:', err);
-      setError(authMessageFromError(err));
+      setError(formatFirebaseAuthError(err));
     } finally {
       setLoading(false);
     }
@@ -107,16 +123,12 @@ const Auth: React.FC = () => {
         className="w-full max-w-md"
       >
         <div className="text-center mb-8">
-          <Logo size="xl" className="mb-4" />
+          <Logo size="md" className="mb-4 !p-0" />
           <h2 className="font-serif text-4xl sm:text-5xl text-primary/80 font-light tracking-tight mb-3">Sign in to Regrade</h2>
           <p className="text-on-surface-variant font-bold opacity-50 text-sm uppercase tracking-[0.6em]">Your personal grade appeal assistant</p>
         </div>
 
         <div className="glass-panel p-8 md:p-10 rounded-3xl border border-primary/10 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-4 opacity-5">
-             <ICONS.Lock size={120} />
-          </div>
-
           <AnimatePresence mode="wait">
             {notice && (
               <motion.div
@@ -141,6 +153,15 @@ const Auth: React.FC = () => {
               </motion.div>
             )}
           </AnimatePresence>
+
+          {!isLogin && !forgotPassword && (
+            <div className="mb-4 p-3 bg-blue-50 border border-blue-100 rounded-xl text-blue-800 text-xs leading-relaxed flex items-start gap-2">
+              <ICONS.AlertCircle size={14} className="shrink-0 mt-0.5" />
+              <span>
+                <strong className="font-bold">Email verification required.</strong> After creating your account, check your inbox for a verification link before signing in.
+              </span>
+            </div>
+          )}
 
           <form onSubmit={handleSubmit} className="space-y-6 relative z-10">
             <div className="space-y-4">
@@ -191,7 +212,7 @@ const Auth: React.FC = () => {
 
             <button 
               type="submit"
-              disabled={loading}
+              disabled={loading || googleLoading}
               className="w-full bg-primary text-white py-4 rounded-xl font-bold tracking-widest uppercase text-xs shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
             >
               {loading ? (
@@ -210,16 +231,24 @@ const Auth: React.FC = () => {
             )}
 
             {!forgotPassword && (
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-2">
                 <button 
                   type="button"
                   onClick={handleGoogleLogin}
-                  disabled={loading}
-                  className="w-full border border-primary/10 py-5 rounded-2xl font-serif text-sm italic tracking-widest hover:bg-primary/5 transition-all flex items-center justify-center gap-4 group disabled:opacity-50"
+                  disabled={loading || googleLoading}
+                  className="w-full border border-primary/10 py-5 rounded-2xl font-serif text-base tracking-wide hover:bg-primary/5 transition-all flex items-center justify-center gap-4 group disabled:opacity-50 min-h-[52px]"
                 >
-                  <ICONS.Bank size={20} className="text-primary/60 group-hover:scale-110 transition-transform" />
-                  Continue with Google
+                  {googleLoading ? (
+                    <ICONS.AILogo className="animate-spin text-primary" size={22} />
+                  ) : (
+                    'Continue with Google'
+                  )}
                 </button>
+                {googleLoading ? (
+                  <p className="text-center text-[11px] text-primary/45 font-serif leading-relaxed px-1">
+                    Finish the Google window or passkey prompt — it can take 10–30 seconds. Do not close this tab.
+                  </p>
+                ) : null}
               </div>
             )}
           </form>
@@ -240,6 +269,19 @@ const Auth: React.FC = () => {
         <p className="mt-8 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-primary/30">
           Your data is private and secure with Regrade
         </p>
+        {legal ? (
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-bold uppercase tracking-[0.25em] text-primary/35">
+            <button type="button" onClick={legal.openPrivacy} className="min-h-[44px] px-2 hover:text-primary transition-colors">
+              Privacy
+            </button>
+            <span className="text-primary/20" aria-hidden>
+              ·
+            </span>
+            <button type="button" onClick={legal.openSupport} className="min-h-[44px] px-2 hover:text-primary transition-colors">
+              Support
+            </button>
+          </div>
+        ) : null}
       </motion.div>
     </div>
   );

@@ -47,6 +47,7 @@ app.use(userLimiter);
 app.get("/health", (_req, res) => res.json({ ok: true }));
 
 // Gemini proxy: large JSON — must run before the global 64kb parser.
+// Jobs are also served from this router at /v1/gemini/jobs/:jobId
 app.use(
   "/v1/gemini",
   express.json({ limit: "25mb", type: ["application/json", "application/*+json"] }),

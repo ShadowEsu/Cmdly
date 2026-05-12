@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ICONS, DEFAULT_AVATAR_SRC } from '../constants';
+import { useLegalLinks } from '../context/LegalLinksContext';
 import { auth } from '../lib/firebase';
 import Logo from './Logo';
 
@@ -11,6 +12,7 @@ interface LayoutProps {
 }
 
 export default function Layout({ children, activeTab, onTabChange }: LayoutProps) {
+  const legal = useLegalLinks();
   const user = auth.currentUser;
   const firstName = user?.displayName?.split(' ')[0] || user?.email?.split('@')[0] || '';
 
@@ -91,8 +93,24 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
         </motion.div>
       </main>
 
+      {legal ? (
+        <footer className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 pb-2 lg:pb-3 mb-20 lg:mb-0 text-center">
+          <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-[10px] font-bold uppercase tracking-[0.25em] text-primary/35">
+            <button type="button" onClick={legal.openPrivacy} className="min-h-[44px] px-2 hover:text-primary transition-colors">
+              Privacy
+            </button>
+            <span className="text-primary/20" aria-hidden>
+              ·
+            </span>
+            <button type="button" onClick={legal.openSupport} className="min-h-[44px] px-2 hover:text-primary transition-colors">
+              Support
+            </button>
+          </div>
+        </footer>
+      ) : null}
+
       <nav
-        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-primary/15 px-1 pt-2 pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        className="lg:hidden fixed bottom-0 left-0 right-0 z-50 glass-panel border-t border-primary/15 px-1 pt-1 pb-[max(0.6rem,env(safe-area-inset-bottom))]"
         aria-label="Main"
       >
         <div className="flex justify-around items-stretch max-w-lg mx-auto gap-1">
@@ -100,14 +118,14 @@ export default function Layout({ children, activeTab, onTabChange }: LayoutProps
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex flex-col items-center justify-center gap-1 transition-all flex-1 min-h-14 min-w-0 py-2 px-0.5 rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-surface ${
+              className={`flex flex-col items-center justify-center gap-1 transition-all flex-1 min-h-12 min-w-0 py-1.5 px-0.5 rounded-xl active:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-primary/40 focus:ring-offset-2 focus:ring-offset-surface ${
                 activeTab === tab.id ? 'text-primary bg-primary/[0.06]' : 'text-on-surface-variant/45 hover:text-on-surface-variant/70'
               }`}
               aria-label={tab.label}
               aria-current={activeTab === tab.id ? 'page' : undefined}
             >
-              <tab.icon className="w-6 h-6 shrink-0" strokeWidth={activeTab === tab.id ? 2.35 : 1.85} />
-              <span className="text-sm font-semibold uppercase tracking-wide leading-tight text-center line-clamp-1">
+              <tab.icon className="w-5 h-5 shrink-0" strokeWidth={activeTab === tab.id ? 2.35 : 1.85} />
+              <span className="text-[11px] font-semibold uppercase tracking-wide leading-tight text-center line-clamp-1">
                 {tab.label}
               </span>
             </button>
